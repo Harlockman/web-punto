@@ -1,47 +1,69 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8"><title>VideoTeca VIP</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>VideoTeca VIP</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
-    <div id="auth-screen">
-        <div class="auth-card">
-            <h1>VIDEOTECA<span>VIP</span></h1>
-            <p id="auth-msg">Ingresa para continuar</p>
-            <input type="text" id="reg-name" placeholder="Nombre" style="display:none">
-            <input type="number" id="phone" placeholder="Móvil (8 dígitos)">
-            <input type="password" id="pass" placeholder="Contraseña">
-            <button id="btnAuth" class="btn-red">INICIAR SESIÓN</button>
-            <p onclick="window.toggleAuthMode()" style="cursor:pointer; margin-top:15px; font-size:12px;">¿No tienes cuenta? Regístrate</p>
-        </div>
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">VIDEOTECA<span>VIP</span></div>
+    <p id="auth-msg">Ingresa tus datos para entrar</p>
+    <input type="text" id="reg-name" placeholder="Nombre completo" style="display:none"/>
+    <div class="phone-group">
+      <span>+53</span>
+      <input type="number" id="phone" placeholder="Número móvil"/>
     </div>
+    <input type="password" id="pass" placeholder="Contraseña"/>
+    <button id="btnAuth" class="btn-red">INICIAR SESIÓN</button>
+    <p id="toggleAuth" style="cursor:pointer; margin-top:15px; font-size:13px;">¿No tienes cuenta? <b>Regístrate aquí</b></p>
+  </div>
+</div>
 
-    <nav id="navbar">
-        <div class="logo">VIDEOTECA<span>VIP</span></div>
-        <div class="nav-right">
-            <span id="uName"></span>
-            <button id="mod-btn" style="display:none; background:none; border:none; color:gold; cursor:pointer;" onclick="alert('Panel Mod')">⚙️</button>
-            <button onclick="window.userLogout()" class="btn-red" style="padding:5px 10px; font-size:10px;">SALIR</button>
-        </div>
-    </nav>
+<nav id="navbar">
+  <a href="#" class="logo" onclick="window.showAll(); return false;">VIDEOTECA<span>VIP</span></a>
+  <div class="nav-cats">
+    <button class="nav-cat active" onclick="window.filterCat(this,'all')">Inicio</button>
+    <button class="nav-cat" onclick="window.filterCat(this,'Peliculas')">Películas</button>
+    <button class="nav-cat" onclick="window.filterCat(this,'Series')">Series</button>
+    <button class="nav-cat" onclick="window.filterCat(this,'Anime')">Anime</button>
+  </div>
+  <div class="nav-right">
+    <button class="nav-btn" onclick="window.toggleSearch()">🔍</button>
+    <span id="uName"></span>
+    <button id="mod-btn" class="nav-btn" style="display:none" onclick="window.openMod()">⚙️</button>
+    <button onclick="window.userLogout()" class="nav-btn">↩</button>
+    <button class="cart-btn" onclick="window.toggleCart()">
+      🛒<span id="cart-count" class="badge">0</span>
+    </button>
+  </div>
+  <div id="search-bar">
+    <input type="text" id="search-input" placeholder="Buscar títulos..." oninput="window.doSearch(this.value)"/>
+  </div>
+</nav>
 
-    <main id="sections-wrapper">
-        </main>
+<header id="hero-slider"></header>
+<main id="catalog-container"></main>
 
-    <div class="modal-overlay" id="modal-details" onclick="window.overlayClose(event,'modal-details')">
-        <div class="modal-box">
-            <div id="videoBox" class="v-box"></div>
-            <div class="modal-body">
-                <h1 id="mTitle"></h1>
-                <p id="mDesc"></p>
-                <button class="btn-red" onclick="window.closeModals()">CERRAR</button>
-            </div>
-        </div>
+<div id="modal-details" class="modal-overlay" onclick="window.overlayClose(event,'modal-details')">
+  <div class="modal-card">
+    <div id="videoBox" class="v-box"></div>
+    <div class="modal-info">
+      <h2 id="mTitle"></h2>
+      <p id="mDesc"></p>
+      <div class="modal-actions">
+        <button id="btnTrailer" class="btn-outline">🎬 VER TRÁILER</button>
+        <button id="btnAddModal" class="btn-red">🛒 AÑADIR AL PEDIDO</button>
+      </div>
+      <button class="btn-flat" onclick="window.closeModals()">CERRAR</button>
     </div>
+  </div>
+</div>
 
-    <script type="module" src="script.js"></script>
+<script type="module" src="script.js"></script>
 </body>
 </html>
