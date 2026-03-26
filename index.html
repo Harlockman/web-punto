@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <title>VideoTeca VIP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="auth-screen">
+        <div class="auth-card">
+            <h1>VIDEOTECA VIP</h1>
+            <p id="auth-msg" style="color: #888; margin-bottom: 15px; font-size: 14px;">Ingresa tus datos para entrar</p>
+            
+            <input type="text" id="reg-name" placeholder="Nombre completo" style="display:none">
+            
+            <div class="phone-input-group">
+                <span>+53</span>
+                <input type="number" id="phone" placeholder="Número móvil">
+            </div>
+            
+            <input type="password" id="pass" placeholder="Contraseña">
+            
+            <button id="btnAuth" class="btn-red">INICIAR SESIÓN</button>
+            
+            <p id="toggleAuth">¿No tienes cuenta? <b>Regístrate aquí</b></p>
+        </div>
+    </div>
+
+    <nav id="navbar">
+        <a href="#" class="logo">VIDEOTECA</a>
+        <div class="nav-right">
+            <span id="uName"></span>
+            <button onclick="userLogout()" class="btn-logout">Cerrar Sesión</button>
+            <button onclick="toggleCart()" class="cart-trigger">
+                🛒<span id="cCount">0</span>
+            </button>
+        </div>
+    </nav>
+
+    <header id="hero"></header>
+
+    <div id="sections-wrapper"></div>
+
+    <div class="modal" id="modal-details">
+        <div class="modal-inner">
+            <div class="v-box" id="videoBox"></div>
+            <div class="modal-body">
+                <h2 id="mTitle"></h2>
+                <p id="mStats" style="color:var(--green); font-weight:bold; font-size:14px"></p>
+                <p id="mDesc"></p>
+                <div class="modal-btns">
+                    <button class="btn-outline" id="btnTrailer">🎬 VER TRÁILER</button>
+                    <button class="btn-red" id="btnAddModal">🛒 AÑADIR AL PEDIDO</button>
+                </div>
+                <button onclick="closeModals()" class="btn-flat">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modal-qty">
+        <div class="modal-inner small-modal">
+            <h2 id="qtyTitle"></h2>
+            <p style="margin: 10px 0; font-size: 14px; color: #888;">Selecciona lo que deseas pedir:</p>
+            
+            <label>Temporada:</label>
+            <select id="selSeason"></select>
+
+            <label>Capítulos:</label>
+            <select id="selType" onchange="toggleCustomCaps()">
+                <option value="completa">Temporada Completa</option>
+                <option value="serie_completa">Toda la Serie (Completa)</option>
+                <option value="especifico">Capítulos específicos...</option>
+            </select>
+            
+            <textarea id="customCaps" style="display:none" placeholder="Ej: Caps 1, 2, 5 al 10..."></textarea>
+
+            <button class="btn-red" id="btnConfirmAdd">CONFIRMAR</button>
+            <button onclick="closeModals()" class="btn-flat">Cancelar</button>
+        </div>
+    </div>
+
+    <div id="cart-panel">
+        <h2>MI PEDIDO</h2>
+        <div id="cItems"></div>
+        <div class="cart-footer">
+            <div class="total-row"><span>TOTAL:</span><span id="cTotal">0</span></div>
+            <button onclick="checkout()" class="btn-red">ENVIAR PEDIDO</button>
+            <div id="divCode" class="order-result">
+                <p>CÓDIGO DE RECOGIDA:</p>
+                <h1 id="resCode"></h1>
+            </div>
+        </div>
+        <span onclick="toggleCart()" class="close-cart">✕</span>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
