@@ -1,48 +1,180 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VideoTeca VIP</title>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>VideoTeca VIP</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
-    <div id="auth-screen">
-        <div class="auth-card">
-            <h1 class="logo-auth">VIDEOTECA<span>VIP</span></h1>
-            <div id="auth-form">
-                <input type="text" id="reg-name" placeholder="Nombre completo" style="display:none">
-                <input type="number" id="phone" placeholder="Móvil (8 dígitos)">
-                <input type="password" id="pass" placeholder="Contraseña">
-                <button id="btnAuth" class="btn-red">ENTRAR</button>
-                <p onclick="window.toggleAuthMode()" class="toggle-text">¿Nuevo aquí? Regístrate</p>
-            </div>
+<!-- ════════════ PANTALLA DE ACCESO ════════════ -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">VIDEOTECA<span>VIP</span></div>
+    <p id="auth-subtitle">Ingresa tus datos para continuar</p>
+    <input type="text"     id="reg-name" placeholder="Nombre completo" class="auth-input" style="display:none"/>
+    <div class="phone-wrap">
+      <span class="phone-prefix">+53</span>
+      <input type="number" id="phone" placeholder="Número móvil (8 dígitos)" class="auth-input phone-field"/>
+    </div>
+    <input type="password" id="pass" placeholder="Contraseña" class="auth-input"/>
+    <button id="btn-auth" class="btn-red">INICIAR SESIÓN</button>
+    <p id="auth-toggle">¿No tienes cuenta? <b>Regístrate</b></p>
+  </div>
+</div>
+
+<!-- ════════════ NAVBAR ════════════ -->
+<nav id="navbar">
+  <a class="logo" href="#" onclick="resetView();return false">VIDEOTECA</a>
+  <div class="nav-menu" id="nav-menu">
+    <span class="m-item active" onclick="filterSection(this,'all')">Inicio</span>
+    <span class="m-item" onclick="filterSection(this,'Peliculas')">Películas</span>
+    <span class="m-item" onclick="filterSection(this,'Series')">Series</span>
+    <span class="m-item" onclick="filterSection(this,'Novelas')">Novelas</span>
+    <span class="m-item" onclick="filterSection(this,'Shows')">Shows</span>
+    <span class="m-item" onclick="filterSection(this,'Animados')">Animados</span>
+    <span class="m-item" onclick="filterSection(this,'Anime')">Anime</span>
+    <span class="m-item" onclick="filterSection(this,'Donghua')">Donghua</span>
+    <span class="m-item" onclick="filterSection(this,'Sagas')">Sagas</span>
+  </div>
+  <div class="nav-right">
+    <div class="search-box" id="search-box">
+      <input type="text" id="search-input" placeholder="Buscar…" oninput="liveSearch(this.value)"/>
+    </div>
+    <button class="icon-btn" onclick="toggleSearch()" title="Buscar">🔍</button>
+    <span id="user-name"></span>
+    <button class="icon-btn mod-only" id="btn-mod" onclick="openMod()" title="Moderador">⚙️</button>
+    <button class="icon-btn" onclick="doLogout()" title="Salir">↩</button>
+    <button class="cart-btn" onclick="toggleCart()">
+      🛒 <span id="cart-count">0</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ════════════ HERO / SLIDER ════════════ -->
+<div id="hero-wrap">
+  <div id="hero-slides"></div>
+  <div id="hero-dots"></div>
+</div>
+
+<!-- ════════════ CATÁLOGO ════════════ -->
+<main id="catalog"></main>
+
+<!-- ════════════ MODAL DETALLE ════════════ -->
+<div id="overlay-detail" class="overlay" onclick="closeOverlay('overlay-detail')">
+  <div class="modal-box detail-box" onclick="event.stopPropagation()">
+    <button class="modal-x" onclick="closeOverlay('overlay-detail')">✕</button>
+    <div class="detail-media" id="detail-media"></div>
+    <div class="detail-body">
+      <div class="detail-meta-row">
+        <span class="detail-score" id="d-score"></span>
+        <span class="detail-year"  id="d-year"></span>
+        <span class="detail-badge" id="d-cat"></span>
+        <span class="detail-badge" id="d-dur"></span>
+      </div>
+      <h2 class="detail-title" id="d-title"></h2>
+      <p  class="detail-plot"  id="d-plot"></p>
+      <div class="detail-extra" id="d-extra"></div>
+      <div class="detail-actions">
+        <button class="btn-play-sm" onclick="playTrailer()">▶ TRÁILER</button>
+        <button class="btn-red-sm"  onclick="startAdd(null)">🛒 AÑADIR AL PEDIDO</button>
+      </div>
+      <div class="detail-price-row">
+        <span>Precio: </span>
+        <strong id="d-price" class="price-green"></strong>
+        <button class="btn-red-sm" style="margin-left:auto" onclick="startAdd(null)">Añadir</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ MODAL SELECCIÓN (series/episódicos) ════════════ -->
+<div id="overlay-qty" class="overlay" onclick="closeOverlay('overlay-qty')">
+  <div class="modal-box qty-box" onclick="event.stopPropagation()">
+    <button class="modal-x" onclick="closeOverlay('overlay-qty')">✕</button>
+    <h3 id="qty-title"></h3>
+    <p class="qty-sub">Selecciona lo que deseas pedir</p>
+
+    <label class="form-lbl">Temporada:</label>
+    <select id="sel-season"></select>
+
+    <label class="form-lbl">Cantidad:</label>
+    <select id="sel-type" onchange="onTypeChange()">
+      <option value="completa">Temporada completa</option>
+      <option value="serie">Toda la serie</option>
+      <option value="caps">Capítulos específicos…</option>
+    </select>
+    <textarea id="caps-input" placeholder="Ej: 1, 2, 5 al 10…"></textarea>
+
+    <button class="btn-red" onclick="confirmAdd()">CONFIRMAR PEDIDO</button>
+  </div>
+</div>
+
+<!-- ════════════ CARRITO ════════════ -->
+<div id="cart-panel">
+  <span class="cart-close" onclick="toggleCart()">✕</span>
+  <h2 class="cart-heading">MI PEDIDO</h2>
+  <div id="cart-items"></div>
+  <div class="cart-foot">
+    <div class="cart-total-row">
+      <span>TOTAL</span>
+      <span id="cart-total">CUP 0</span>
+    </div>
+    <button class="btn-red" onclick="doCheckout()">ENVIAR PEDIDO</button>
+    <div id="order-result" class="order-result" style="display:none">
+      <p>CÓDIGO DE RECOGIDA:</p>
+      <div class="order-code" id="order-code"></div>
+      <p class="order-hint">Muéstraselo al dueño del negocio</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ PANEL MODERADOR ════════════ -->
+<div id="overlay-mod" class="overlay" onclick="closeOverlay('overlay-mod')">
+  <div class="modal-box mod-box" onclick="event.stopPropagation()">
+    <button class="modal-x" onclick="closeOverlay('overlay-mod')">✕</button>
+    <div class="mod-head">⚙ PANEL MODERADOR</div>
+    <div class="mod-tabs">
+      <button class="mod-tab active" onclick="modTab(this,'mtab-prices')">💰 Precios</button>
+      <button class="mod-tab"        onclick="modTab(this,'mtab-catalog')">📋 Catálogo</button>
+    </div>
+
+    <!-- TAB PRECIOS -->
+    <div id="mtab-prices" class="mtab-content">
+      <div class="mode-toggle-row">
+        <span class="mode-lbl">Modo de precio activo:</span>
+        <div class="mode-toggle">
+          <button class="mode-btn active" id="mode-files" onclick="setMode('ficheros')">Por ficheros</button>
+          <button class="mode-btn"        id="mode-cap"   onclick="setMode('capacidad')">Por capacidad</button>
         </div>
+      </div>
+
+      <!-- precios ficheros -->
+      <div id="pane-files">
+        <p class="pane-hint">Precio por unidad/fichero según tipo (CUP)</p>
+        <div class="price-grid" id="pg-files"></div>
+      </div>
+      <!-- precios capacidad -->
+      <div id="pane-cap" style="display:none">
+        <p class="pane-hint">Precio según espacio en disco (CUP)</p>
+        <div class="price-grid" id="pg-cap"></div>
+      </div>
+
+      <button class="btn-red" style="margin-top:16px;width:100%" onclick="savePrices()">💾 Guardar precios</button>
     </div>
 
-    <div id="main-ui" style="display:none;">
-        <nav id="navbar">
-            <div class="nav-content">
-                <div class="logo" onclick="location.reload()">VIDEOTECA</div>
-                <div class="menu">
-                    <span class="m-item active" onclick="window.filterCat(this, 'all')">Inicio</span>
-                    <span class="m-item" onclick="window.filterCat(this, 'Peliculas')">Películas</span>
-                    <span class="m-item" onclick="window.filterCat(this, 'Series')">Series</span>
-                    <span class="m-item" onclick="window.filterCat(this, 'Anime')">Anime</span>
-                </div>
-                <div class="nav-right">
-                    <span id="user-display" style="margin-right: 15px; font-size: 12px; color: #aaa;"></span>
-                    <button onclick="window.userLogout()" class="btn-exit">SALIR</button>
-                </div>
-            </div>
-        </nav>
-
-        <header id="hero"></header>
-        <main id="catalog-container"></main>
+    <!-- TAB CATÁLOGO -->
+    <div id="mtab-catalog" class="mtab-content" style="display:none">
+      <p class="pane-hint">Catálogo en Firebase · <b id="cat-total">—</b> títulos</p>
+      <div id="cat-list"></div>
     </div>
+  </div>
+</div>
 
-    <script type="module" src="script.js"></script>
+<div id="toast" class="toast"></div>
+
+<script type="module" src="script.js"></script>
 </body>
 </html>
