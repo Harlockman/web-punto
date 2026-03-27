@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-    <title>VideoTeca VIP — Inteligente</title>
+    <title>VideoTeca VIP — Ultra</title>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;700&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="style.css"/>
 </head>
@@ -11,32 +11,37 @@
 
     <div id="auth-screen">
         <div class="auth-card">
-            <h1>VIDEOTECA<span>VIP</span></h1>
+            <h1 class="glow-text">VIDEOTECA<span>VIP</span></h1>
             <div id="auth-form">
                 <input type="text" id="reg-name" placeholder="Nombre completo" style="display:none">
-                <input type="number" id="phone" placeholder="Móvil (8 dígitos)">
+                <div class="input-group">
+                    <span>+53</span>
+                    <input type="number" id="phone" placeholder="Móvil">
+                </div>
                 <input type="password" id="pass" placeholder="Contraseña">
-                <button id="btnAuth" class="btn-red">ENTRAR</button>
-                <p onclick="window.toggleAuthMode()" id="toggleAuth">¿No tienes cuenta? Regístrate</p>
+                <button id="btnAuth" class="btn-main">ENTRAR</button>
+                <p onclick="window.toggleAuthMode()" id="toggleAuth">¿Nuevo aquí? <b>Regístrate</b></p>
             </div>
         </div>
     </div>
 
     <nav id="navbar">
-        <div class="logo" onclick="window.showAll()">VIDEOTECA</div>
-        <div class="nav-cats">
-            <button class="nav-cat active" onclick="window.filterCat(this,'all')">Inicio</button>
-            <button class="nav-cat" onclick="window.filterCat(this,'Peliculas')">Películas</button>
-            <button class="nav-cat" onclick="window.filterCat(this,'Series')">Series</button>
+        <div class="logo" onclick="window.filterCat(null,'all')">VIDEOTECA</div>
+        <div class="nav-links">
+            <span class="n-link active" onclick="window.filterCat(this,'all')">Inicio</span>
+            <span class="n-link" onclick="window.filterCat(this,'Peliculas')">Películas</span>
+            <span class="n-link" onclick="window.filterCat(this,'Series')">Series</span>
+            <span class="n-link" onclick="window.filterCat(this,'Anime')">Anime</span>
         </div>
         <div class="nav-right">
-            <input type="text" id="search-input" placeholder="Buscar..." oninput="window.doSearch(this.value)">
-            <span id="uName"></span>
-            <button onclick="window.userLogout()" class="btn-logout">↩</button>
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Buscar..." oninput="window.doSearch(this.value)">
+            </div>
+            <button onclick="window.userLogout()" class="btn-exit">✕</button>
         </div>
     </nav>
 
-    <main id="catalog-container"></main>
+    <header id="hero"></header> <main id="catalog-container"></main>
 
     <script type="module" src="script.js"></script>
 </body>
