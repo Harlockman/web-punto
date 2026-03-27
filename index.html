@@ -11,36 +11,37 @@
 
     <div id="auth-screen">
         <div class="auth-card">
-            <h1 class="logo-main">VIDEOTECA<span>VIP</span></h1>
+            <h1 class="logo-auth">VIDEOTECA<span>VIP</span></h1>
             <div id="auth-form">
-                <input type="text" id="reg-name" placeholder="Tu nombre" style="display:none">
+                <input type="text" id="reg-name" placeholder="Nombre completo" style="display:none">
                 <input type="number" id="phone" placeholder="Móvil (8 dígitos)">
                 <input type="password" id="pass" placeholder="Contraseña">
                 <button id="btnAuth" class="btn-red">ENTRAR</button>
-                <p onclick="window.toggleAuthMode()" class="toggle-text">¿No tienes cuenta? Regístrate</p>
+                <p onclick="window.toggleAuthMode()" class="toggle-text">¿Nuevo aquí? Regístrate</p>
             </div>
         </div>
     </div>
 
-    <nav id="navbar">
-        <div class="nav-content">
-            <div class="logo" onclick="location.reload()">VIDEOTECA</div>
-            <div class="menu">
-                <span class="m-item active" onclick="window.filterCat(this, 'all')">Inicio</span>
-                <span class="m-item" onclick="window.filterCat(this, 'Peliculas')">Películas</span>
-                <span class="m-item" onclick="window.filterCat(this, 'Series')">Series</span>
-                <span class="m-item" onclick="window.filterCat(this, 'Anime')">Anime</span>
+    <div id="main-ui" style="display:none;">
+        <nav id="navbar">
+            <div class="nav-content">
+                <div class="logo" onclick="location.reload()">VIDEOTECA</div>
+                <div class="menu">
+                    <span class="m-item active" onclick="window.filterCat(this, 'all')">Inicio</span>
+                    <span class="m-item" onclick="window.filterCat(this, 'Peliculas')">Películas</span>
+                    <span class="m-item" onclick="window.filterCat(this, 'Series')">Series</span>
+                    <span class="m-item" onclick="window.filterCat(this, 'Anime')">Anime</span>
+                </div>
+                <div class="nav-right">
+                    <span id="user-display" style="margin-right: 15px; font-size: 12px; color: #aaa;"></span>
+                    <button onclick="window.userLogout()" class="btn-exit">SALIR</button>
+                </div>
             </div>
-            <div class="nav-right">
-                <span id="uName"></span>
-                <button onclick="window.userLogout()" class="btn-exit">SALIR</button>
-            </div>
-        </div>
-    </nav>
+        </nav>
 
-    <header id="hero"></header>
-
-    <main id="catalog-container"></main>
+        <header id="hero"></header>
+        <main id="catalog-container"></main>
+    </div>
 
     <script type="module" src="script.js"></script>
 </body>
