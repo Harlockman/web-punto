@@ -2,73 +2,93 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-const FB_CONFIG = { /* TUS DATOS DE CONFIGURACIÓN */ };
+const FB_CONFIG = { /* TUS DATOS AQUÍ */ };
 const app = initializeApp(FB_CONFIG);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
 let allItems = [];
 
-onAuthStateChanged(auth, u => {
-    if (u) {
+// FUNCIONES GLOBALES (Para que el HTML las reconozca)
+window.filterCat = (el, cat) => {
+    document.querySelectorAll('.n-link').forEach(l => l.classList.remove('active'));
+    if(el) el.classList.add('active');
+    renderGrid(cat);
+};
+
+window.userLogout = () => signOut(auth).then(() => location.reload());
+
+// DETECTAR ESTADO DE USUARIO
+onAuthStateChanged(auth, user => {
+    if (user) {
         document.getElementById('auth-screen').style.display = 'none';
         loadData();
+    } else {
+        document.getElementById('auth-screen').style.display = 'flex';
     }
 });
 
 async function loadData() {
-    const snap = await getDocs(collection(db, "catalogo"));
-    const raw = snap.docs.map(d => d.data());
+    try {
+        const snap = await getDocs(collection(db, "catalogo"));
+        allItems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-    // --- LÓGICA DE AGRUPACIÓN DE ANIME ---
-    allItems = raw.map(item => {
-        // Si el género o la categoría indica que es anime, lo movemos a "Anime"
-        if (item.genre_ids?.includes(16) || item.isAnime) {
-            item.category = "Anime";
-        }
-        return item;
-    });
+        // Clasificación inteligente: Anime
+        allItems = allItems.map(item => {
+            // Si el escáner marcó isAnime o tiene género 16 (Animación)
+            if (item.isAnime === true || (item.genre_ids && item.genre_ids.includes(16))) {
+                item.category = "Anime";
+            }
+            return item;
+        });
 
-    setHero();
-    renderGrid('all');
+        updateHero();
+        renderGrid('all');
+    } catch (e) {
+        console.error("Error cargando Firebase:", e);
+    }
 }
 
-function setHero() {
-    const featured = allItems[Math.floor(Math.random() * allItems.length)];
-    if (featured) {
-        const hero = document.getElementById('hero');
-        hero.style.backgroundImage = `linear-gradient(to top, var(--black), transparent), url(${featured.backdrop || featured.poster})`;
-        hero.innerHTML = `
-            <div class="hero-content">
-                <h1 style="font-family:'Bebas Neue'; font-size: clamp(40px, 8vw, 80px); margin:0;">${featured.title}</h1>
-                <p style="max-width: 600px; color: #ccc; font-size: 14px;">${featured.plot?.substring(0, 150)}...</p>
-                <button class="btn-main" style="width:auto; padding: 12px 30px;">VER AHORA</button>
+function updateHero() {
+    const hero = document.getElementById('hero');
+    if (!hero || allItems.length === 0) return;
+
+    // Tomar uno al azar para el carrusel principal
+    const pick = allItems[Math.floor(Math.random() * allItems.length)];
+    
+    hero.style.backgroundImage = `url(${pick.backdrop || pick.poster})`;
+    hero.innerHTML = `
+        <div class="hero-content">
+            <h1 style="font-family:'Bebas Neue'; font-size: 3rem; margin:0;">${pick.title}</h1>
+            <p style="color: #ccc; margin: 10px 0;">${pick.plot ? pick.plot.substring(0, 160) + '...' : ''}</p>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-main" style="padding: 10px 25px; background:white; color:black; border:none; font-weight:bold; cursor:pointer;">▶ Reproducir</button>
+                <button style="padding: 10px 25px; background:rgba(128,128,128,0.5); color:white; border:none; font-weight:bold; cursor:pointer;">ℹ Más Info</button>
             </div>
-        `;
-    }
+        </div>
+    `;
 }
 
 function renderGrid(filter) {
     const container = document.getElementById('catalog-container');
+    if (!container) return;
     container.innerHTML = "";
 
-    // Si filtramos por "all", mostramos filas por categorías
-    const categories = filter === 'all' ? ['Peliculas', 'Series', 'Anime'] : [filter];
+    const cats = (filter === 'all') ? ['Peliculas', 'Series', 'Anime'] : [filter];
 
-    categories.forEach(cat => {
-        const filtered = allItems.filter(i => i.category === cat);
-        if (filtered.length === 0) return;
+    cats.forEach(cat => {
+        const list = allItems.filter(i => i.category === cat);
+        if (list.length === 0) return;
 
         let html = `<div class="section-title">${cat}</div><div class="grid">`;
-        filtered.forEach(item => {
-            const label = item.category === 'Series' ? `${item.seasons} Temp` : item.year;
+        list.forEach(item => {
             html += `
                 <div class="card">
-                    <span class="badge">${label}</span>
-                    <img src="${item.poster}" loading="lazy">
-                    <div class="card-overlay">
-                        <div class="card-title">${item.title}</div>
-                    </div>
+                    <img src="${item.poster}" alt="${item.title}" loading="lazy">
+                    <div style="padding:8px; font-size:12px; font-weight:bold;">${item.title}</div>
+                    <span class="badge" style="position:absolute; top:5px; right:5px; background:red; font-size:10px; padding:2px 5px; border-radius:2px;">
+                        ${item.category === 'Series' ? item.seasons+' Temp' : item.year}
+                    </span>
                 </div>
             `;
         });
@@ -76,24 +96,3 @@ function renderGrid(filter) {
         container.innerHTML += html;
     });
 }
-
-// Controladores de interfaz
-window.filterCat = (btn, cat) => {
-    document.querySelectorAll('.n-link').forEach(l => l.classList.remove('active'));
-    if(btn) btn.classList.add('active');
-    renderGrid(cat);
-    window.scrollTo({top: cat === 'all' ? 0 : 400, behavior: 'smooth'});
-};
-
-window.addEventListener('scroll', () => {
-    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
-});
-
-window.doSearch = (q) => {
-    // Lógica de búsqueda que oculta/muestra tarjetas
-    const query = q.toLowerCase();
-    document.querySelectorAll('.card').forEach(card => {
-        const title = card.querySelector('.card-title').innerText.toLowerCase();
-        card.style.display = title.includes(query) ? "block" : "none";
-    });
-};
