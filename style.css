@@ -239,3 +239,54 @@ textarea{display:none;resize:vertical;min-height:68px}
 .ep-num{font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--red);min-width:30px;flex-shrink:0}
 .ep-name{font-size:12px;color:#ccc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ep-year{font-size:10px;color:#555;flex-shrink:0}
+
+/* ── SEC HEADER CON FLECHAS ───────────────────────────────── */
+.sec-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 11px;
+  padding-right: 2px;
+}
+.sec-arrows {
+  display: flex;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity .25s;
+}
+.secblock:hover .sec-arrows { opacity: 1; }
+.sec-arrow {
+  width: 32px; height: 32px;
+  background: rgba(229,9,20,.12);
+  border: 1px solid rgba(229,9,20,.35);
+  color: #fff;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .18s, border-color .18s, transform .15s;
+  padding: 0 0 1px 0;
+  font-family: inherit;
+  user-select: none;
+}
+.sec-arrow:hover {
+  background: var(--red);
+  border-color: var(--red);
+  transform: scale(1.1);
+}
+.sec-arrow:active { transform: scale(.96); }
+
+/* En móvil las flechas siempre visibles */
+@media (max-width: 768px) {
+  .sec-arrows { opacity: 1; }
+  .sec-arrow { width: 26px; height: 26px; font-size: 16px; }
+}
+
+/* rowscroll: ocultar scrollbar pero mantener funcional */
+.rowscroll {
+  scroll-snap-type: x mandatory;
+}
+.rowscroll .card {
+  scroll-snap-align: start;
+}

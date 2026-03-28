@@ -230,15 +230,25 @@ function renderSections(filter) {
   const wrap = document.getElementById("sections");
   wrap.innerHTML = "";
 
-  // Sección "Recientes"
+  // Sección "Recientes" — NO incluir películas que pertenecen a una saga
+  // (aparecerán dentro de la saga cuando el usuario pinche)
   if (filter === "all") {
-    const news = allItems.filter(i => i.nuevo);
+    const news = allItems.filter(i => i.nuevo && !(i.category === "Peliculas" && i.saga));
     if (news.length) wrap.appendChild(buildSection("🔥 Recién llegados", news, "_nuevo"));
   }
 
   const cats = filter === "all" ? CATS : CATS.filter(c => c.key === filter);
   cats.forEach(c => {
-    const items = allItems.filter(i => i.category === c.key);
+    let items;
+    if (c.key === "Peliculas") {
+      // Solo películas que NO pertenecen a ninguna saga
+      items = allItems.filter(i => i.category === "Peliculas" && !i.saga);
+    } else if (c.key === "Sagas") {
+      // Solo los documentos de tipo Saga (la colección), no las películas individuales
+      items = allItems.filter(i => i.category === "Sagas");
+    } else {
+      items = allItems.filter(i => i.category === c.key);
+    }
     if (!items.length) return;
     wrap.appendChild(buildSection(c.label, items, c.key));
   });
@@ -248,15 +258,34 @@ function renderSections(filter) {
 }
 
 function buildSection(title, items, secId) {
+  const uid = "row-" + secId.replace(/[^a-z0-9]/gi,"_") + "_" + Date.now();
   const div = document.createElement("div");
   div.className = "secblock"; div.dataset.sec = secId;
-  div.innerHTML = `<div class="sectitle">${title}</div>`;
+
+  // Cabecera con título y flechas
+  div.innerHTML = `
+    <div class="sec-header">
+      <div class="sectitle">${title}</div>
+      <div class="sec-arrows">
+        <button class="sec-arrow" onclick="scrollRow('${uid}',-1)" aria-label="Anterior">&#8249;</button>
+        <button class="sec-arrow" onclick="scrollRow('${uid}', 1)" aria-label="Siguiente">&#8250;</button>
+      </div>
+    </div>`;
+
   const row = document.createElement("div");
-  row.className = "rowscroll";
+  row.className = "rowscroll"; row.id = uid;
   items.forEach(item => row.appendChild(makeCard(item)));
   div.appendChild(row);
   return div;
 }
+
+window.scrollRow = (rowId, dir) => {
+  const row = document.getElementById(rowId);
+  if (!row) return;
+  // Desplaza ~3 tarjetas (cada una ~160px aprox con gap)
+  const step = row.clientWidth * 0.75;
+  row.scrollBy({ left: dir * step, behavior: "smooth" });
+};
 
 function makeCard(item) {
   const div = document.createElement("div");
