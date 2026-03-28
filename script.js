@@ -36,15 +36,17 @@ const CATS = [
 ];
 
 const FILE_TYPES = [
-  { key:"pelicula",           label:"Película"               },
-  { key:"saga",               label:"Saga (por película)"    },
-  { key:"cap_serie",          label:"Capítulo de serie"      },
-  { key:"cap_novela",         label:"Capítulo de novela"     },
-  { key:"show",               label:"Show / programa"        },
-  { key:"pelicula_animada",   label:"Película animada"       },
-  { key:"cap_animado",        label:"Cap. animado/cartoon"   },
-  { key:"cap_anime",          label:"Cap. anime"             },
-  { key:"cap_donghua",        label:"Cap. donghua"           },
+  { key:"pelicula",           label:"Película"                              },
+  { key:"saga",               label:"Saga (por película)"                   },
+  { key:"cap_serie",          label:"Cap. de serie (por capítulo)"          },
+  { key:"cap_novela",         label:"Cap. de novela (por capítulo)"         },
+  { key:"show",               label:"Show / programa (por emisión)"         },
+  { key:"pelicula_animada",   label:"Película animada occidental"           },
+  { key:"cap_animado",        label:"Cap. animado/cartoon occidental"       },
+  { key:"cap_anime",          label:"Cap. anime japonés (por capítulo)"     },
+  { key:"pelicula_anime",     label:"Película anime japonesa"               },
+  { key:"cap_donghua",        label:"Cap. donghua chino (por capítulo)"     },
+  { key:"pelicula_donghua",   label:"Película donghua china"                },
 ];
 
 const CAP_TIERS = [
@@ -297,7 +299,7 @@ function makeCard(item) {
   div.innerHTML = `
     ${img}
     ${item.nuevo?'<span class="new-tag">NUEVO</span>':""}
-    <button class="qadd" onclick="event.stopPropagation();startAdd('${item.id}')" title="Añadir">+</button>
+    <button class="qadd" onclick="event.stopPropagation();quickAdd('${item.id}')" title="Añadir al carrito">+</button>
     <div class="card-hov">
       <div class="card-hov-name">${esc(item.title||"")}</div>
       <div class="card-hov-meta">★ ${item.rating||"N/A"}${price!=="—"?" · CUP "+price:""}</div>
@@ -306,6 +308,20 @@ function makeCard(item) {
   div.onclick = () => openDetail(item.id);
   return div;
 }
+
+/* quickAdd: desde la tarjeta — añade directo sin picker para peliculas/shows,
+   abre picker para episódicos/sagas */
+window.quickAdd = (id) => {
+  const item = allItems.find(x => x.id === id);
+  if (!item) return;
+  const cat = item.category;
+  if (cat === "Sagas") { curItem = item; openSagaPicker(item); return; }
+  if (["Series","Novelas","Anime","Donghua","Animados"].includes(cat)) {
+    curItem = item; openEpPicker(item); return;
+  }
+  // Películas, shows, peli animada → directo al carrito
+  addToCart(item, catLabel(cat));
+};
 
 /* ── DETALLE MODAL ───────────────────────────────────────── */
 window.openDetail = async (id) => {
@@ -607,24 +623,28 @@ function addToCartSilent(item, note) {
 
 /* ── CARRITO ─────────────────────────────────────────────── */
 function renderCart() {
-  const count  = document.getElementById("cart-count");
-  const items  = document.getElementById("cart-items");
-  const total  = document.getElementById("cart-total");
-  const badge  = count;
+  const count = document.getElementById("cart-count");
+  const items = document.getElementById("cart-items");
+  const total = document.getElementById("cart-total");
 
-  badge.textContent = cart.length;
-  badge.style.display = cart.length ? "flex" : "none";
+  count.textContent = cart.length;
+  count.style.display = cart.length ? "flex" : "none";
   document.getElementById("code-result").style.display = "none";
 
   if (!cart.length) {
     items.innerHTML = `<div style="text-align:center;padding:30px 0;color:#555;font-size:13px">Tu pedido está vacío</div>`;
-    total.textContent = "CUP 0"; return;
+    total.textContent = "CUP 0";
+    document.getElementById("cart-weight").textContent = "";
+    return;
   }
   items.innerHTML = "";
-  let sum = 0;
+  let sum = 0, totalBytes = 0;
   cart.forEach((item, i) => {
     const p = Number(item._price) || 0;
     sum += p;
+    const bytes = Number(item._bytes) || 0;
+    totalBytes += bytes;
+    const sizeStr = bytes ? fmtSize(bytes) : "";
     const div = document.createElement("div");
     div.className = "ci";
     div.innerHTML = `
@@ -632,12 +652,25 @@ function renderCart() {
       <div class="ci-info">
         <div class="ci-name">${esc(item.title)}</div>
         <div class="ci-note">${esc(item._note||"")}</div>
-        ${item._price!=="—"?`<div class="ci-price">CUP ${item._price}</div>`:""}
+        <div class="ci-bottom">
+          ${item._price!=="—"?`<span class="ci-price">CUP ${item._price}</span>`:""}
+          ${sizeStr?`<span class="ci-size">${sizeStr}</span>`:""}
+        </div>
       </div>
       <button class="ci-rm" onclick="removeFromCart(${i})">✕</button>`;
     items.appendChild(div);
   });
   total.textContent = "CUP " + sum;
+  document.getElementById("cart-weight").textContent =
+    totalBytes ? "Peso total: " + fmtSize(totalBytes) : "";
+}
+
+function fmtSize(bytes) {
+  if (!bytes) return "";
+  if (bytes >= 1e12) return (bytes/1e12).toFixed(2) + " TB";
+  if (bytes >= 1e9)  return (bytes/1e9).toFixed(2)  + " GB";
+  if (bytes >= 1e6)  return (bytes/1e6).toFixed(1)  + " MB";
+  return Math.round(bytes/1e3) + " KB";
 }
 
 window.removeFromCart = (i) => { cart.splice(i,1); renderCart(); };
@@ -648,35 +681,88 @@ window.checkout = async () => {
   try {
     const u = auth.currentUser;
     const total = cart.reduce((s,c)=>s+(Number(c._price)||0),0);
+    const totalBytes = cart.reduce((s,c)=>s+(Number(c._bytes)||0),0);
     await addDoc(collection(db,"pedidos"),{
-      codigo:   cod,
-      cliente:  u?.displayName || "Anónimo",
-      telefono: u?.email?.replace("user","").replace("@videotecavip.com","") || "",
-      items:    cart.map(c=>({titulo:c.title, detalle:c._note, precio:c._price})),
+      codigo:    cod,
+      cliente:   u?.displayName || "Anónimo",
+      telefono:  u?.email?.replace("user","").replace("@videotecavip.com","") || "",
+      items:     cart.map(c=>({titulo:c.title, detalle:c._note, precio:c._price, bytes:c._bytes||0})),
       total,
+      peso_total: totalBytes,
       modo_precio: priceMode,
-      status:   "pendiente",
-      fecha:    serverTimestamp(),
+      status:    "pendiente",
+      fecha:     serverTimestamp(),
     });
+    // Mostrar código y dirección
     document.getElementById("code-num").textContent = "#" + cod;
     document.getElementById("code-result").style.display = "block";
+    // Mostrar dirección del negocio si está configurada
+    renderCartAddress();
     cart = [];
     renderCart();
     toast("Pedido enviado — código #" + cod);
   } catch(e) { toast("Error al enviar: " + e.message); }
 };
 
-window.toggleCart = () => document.getElementById("cart-panel").classList.toggle("open");
+function renderCartAddress() {
+  const el = document.getElementById("cart-address");
+  if (!el) return;
+  // La dirección se carga desde config/negocio en Firebase
+  getDoc(doc(db,"config","negocio")).then(snap => {
+    if (snap.exists() && snap.data().direccion) {
+      el.innerHTML = `<div class="cart-addr-box">
+        <div class="cart-addr-lbl">📍 Dirección de recogida</div>
+        <div class="cart-addr-val">${esc(snap.data().direccion)}</div>
+        ${snap.data().telefono?`<div class="cart-addr-tel">📞 ${esc(snap.data().telefono)}</div>`:""}
+      </div>`;
+    }
+  }).catch(()=>{});
+}
+
+window.toggleCart = () => {
+  const panel = document.getElementById("cart-panel");
+  panel.classList.toggle("open");
+  if (panel.classList.contains("open")) renderCartAddress();
+};
 
 /* ── MODERADOR ───────────────────────────────────────────── */
 window.openMod = async () => {
   buildPriceGrids();
   buildCatalogList();
   await loadOrders();
+  await loadNegocioConfig();
   syncModeButtons();
   openOv("ov-mod");
 };
 window.closeMod = () => closeOv("ov-mod");
+
+async function loadNegocioConfig() {
+  try {
+    const snap = await getDoc(doc(db,"config","negocio"));
+    if (snap.exists()) {
+      const d = snap.data();
+      const el = document.getElementById("neg-dir");
+      const et = document.getElementById("neg-tel");
+      const en = document.getElementById("neg-nombre");
+      if (el && d.direccion) el.value = d.direccion;
+      if (et && d.telefono)  et.value = d.telefono;
+      if (en && d.nombre)    en.value = d.nombre;
+    }
+  } catch(_) {}
+}
+
+window.saveNegocio = async () => {
+  const dir    = document.getElementById("neg-dir")?.value || "";
+  const tel    = document.getElementById("neg-tel")?.value || "";
+  const nombre = document.getElementById("neg-nombre")?.value || "";
+  try {
+    await setDoc(doc(db,"config","negocio"), {
+      direccion: dir, telefono: tel, nombre,
+      updated: serverTimestamp()
+    });
+    toast("✓ Datos del negocio guardados");
+  } catch(e) { toast("Error: " + e.message); }
+};
 
 function buildPriceGrids() {
   document.getElementById("pgrid-f").innerHTML = FILE_TYPES.map(c=>`

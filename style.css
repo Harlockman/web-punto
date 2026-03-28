@@ -290,3 +290,21 @@ textarea{display:none;resize:vertical;min-height:68px}
 .rowscroll .card {
   scroll-snap-align: start;
 }
+
+/* ── CARRITO: peso y dirección ────────────────────────────── */
+.ci-bottom{display:flex;align-items:center;gap:8px;margin-top:3px}
+.ci-size{font-size:10px;color:#666;background:#1a1a1a;padding:1px 5px;border-radius:3px}
+.cart-weight-row{font-size:11px;color:#555;margin-bottom:6px;min-height:14px}
+.cart-addr-box{background:#0d1a0d;border:1px solid rgba(70,211,105,.2);border-radius:7px;padding:10px 12px;margin-bottom:10px}
+.cart-addr-lbl{font-size:10px;color:#46d369;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
+.cart-addr-val{font-size:13px;color:#ddd;font-weight:500}
+.cart-addr-tel{font-size:12px;color:#aaa;margin-top:3px}
+#code-result{display:none;text-align:center;margin-top:12px;border:1px dashed var(--red);border-radius:7px;padding:14px}
+.crlbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+#code-num{font-family:'Bebas Neue',sans-serif;font-size:50px;color:var(--red);letter-spacing:6px;line-height:1}
+
+/* ── MOD: formulario negocio ──────────────────────────────── */
+.form-group-mod{margin-bottom:12px}
+.mod-input{width:100%;background:#1a1a1a;border:1px solid #2a2a2a;color:#fff;padding:10px 12px;border-radius:5px;font-family:inherit;font-size:13px;outline:none;transition:border .2s}
+.mod-input:focus{border-color:var(--red)}
+.mod-input::placeholder{color:#444}

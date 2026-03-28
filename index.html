@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>ALTAIR WEB</title>
+<title>VideoTeca VIP</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="style.css"/>
 </head>
@@ -12,7 +12,7 @@
 <!-- ═══ AUTH ════════════════════════════════════════════ -->
 <div id="auth-screen">
   <div class="auth-card">
-    <div class="auth-logo">ALTAIR-PC<span>LOGIN</span></div>
+    <div class="auth-logo">VIDEOTECA<span>VIP</span></div>
     <p id="auth-msg">Ingresa tus datos para entrar</p>
     <input type="text"     id="reg-name" placeholder="Nombre completo" style="display:none"/>
     <div class="phone-group">
@@ -31,7 +31,7 @@
 
   <!-- NAV -->
   <nav id="navbar">
-    <a class="logo" href="#" onclick="showAll();return false">ALTAIR-PC</a>
+    <a class="logo" href="#" onclick="showAll();return false">VIDEOTECA</a>
     <div class="nav-cats" id="nav-cats">
       <button class="ncat active" onclick="navFilter(this,'all')">Inicio</button>
       <button class="ncat" onclick="navFilter(this,'Peliculas')">Películas</button>
@@ -122,14 +122,14 @@
     <h2 class="cart-ttl">MI PEDIDO</h2>
     <div id="cart-items"></div>
     <div class="cart-foot">
-      <div class="cart-total-row">
-        <span>TOTAL:</span><span id="cart-total">CUP 0</span>
-      </div>
+      <div id="cart-address"></div>
+      <div class="cart-weight-row"><span id="cart-weight"></span></div>
+      <div class="cart-total-row"><span>TOTAL:</span><span id="cart-total">CUP 0</span></div>
       <button class="btn-red" onclick="checkout()">ENVIAR PEDIDO</button>
       <div id="code-result">
-        <p>CÓDIGO DE RECOGIDA</p>
+        <p class="crlbl">CÓDIGO DE RECOGIDA</p>
         <div id="code-num"></div>
-        <p class="code-hint">Muéstraselo al dueño</p>
+        <p class="code-hint">Muéstraselo al dueño del negocio</p>
       </div>
     </div>
   </div>
@@ -141,6 +141,7 @@
       <div class="mod-hdr"><span class="mod-badge">⚙ PANEL MODERADOR</span></div>
       <div class="mod-tabs">
         <button class="mtab active" onclick="modTab(this,'tp')">💰 Precios</button>
+        <button class="mtab" onclick="modTab(this,'tn')">🏪 Negocio</button>
         <button class="mtab" onclick="modTab(this,'tc')">📋 Catálogo</button>
         <button class="mtab" onclick="modTab(this,'to')">📦 Pedidos</button>
       </div>
@@ -155,14 +156,32 @@
           </div>
         </div>
         <div id="panel-f">
-          <p class="phint">Precio por fichero según tipo de contenido (CUP)</p>
+          <p class="phint">Precio por tipo de contenido (CUP por fichero)</p>
           <div class="pgrid" id="pgrid-f"></div>
         </div>
         <div id="panel-c" style="display:none">
-          <p class="phint">Precio por tamaño (CUP)</p>
+          <p class="phint">Precio por tamaño de almacenamiento (CUP)</p>
           <div class="pgrid" id="pgrid-c"></div>
         </div>
         <button class="btn-red" style="margin-top:16px" onclick="savePrices()">💾 GUARDAR PRECIOS</button>
+      </div>
+
+      <!-- Pestaña Negocio -->
+      <div id="tn" class="mtab-body" style="display:none">
+        <p class="phint">Datos del negocio que verán los clientes en su carrito</p>
+        <div class="form-group-mod">
+          <label class="flabel">Nombre del negocio</label>
+          <input class="mod-input" id="neg-nombre" placeholder="Ej: VideoTeca VIP"/>
+        </div>
+        <div class="form-group-mod">
+          <label class="flabel">Dirección de recogida</label>
+          <input class="mod-input" id="neg-dir" placeholder="Calle, número, municipio…"/>
+        </div>
+        <div class="form-group-mod">
+          <label class="flabel">Teléfono de contacto</label>
+          <input class="mod-input" id="neg-tel" placeholder="+53 5XXXXXXX"/>
+        </div>
+        <button class="btn-red" style="margin-top:14px" onclick="saveNegocio()">💾 GUARDAR DATOS</button>
       </div>
 
       <!-- Pestaña Catálogo -->
