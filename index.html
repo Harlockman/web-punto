@@ -85,22 +85,34 @@
     </div>
   </div>
 
+  <!-- ═══ MODAL SELECTOR DE SAGA ══════════════════════════ -->
+  <div class="overlay" id="ov-saga" onclick="ovClose(event,'ov-saga')">
+    <div class="mbox small-mbox" style="max-width:520px">
+      <button class="mclose" onclick="closeOv('ov-saga')">✕</button>
+      <h3 id="saga-title" style="font-family:'Bebas Neue',sans-serif;font-size:24px;margin-bottom:4px"></h3>
+      <p class="ep-sub">Elige qué partes deseas pedir:</p>
+      <div id="saga-parts"></div>
+    </div>
+  </div>
+
   <!-- ═══ MODAL EPISODIOS ══════════════════════════════ -->
   <div class="overlay" id="ov-ep" onclick="ovClose(event,'ov-ep')">
-    <div class="mbox small-mbox">
+    <div class="mbox small-mbox" style="max-width:520px">
       <button class="mclose" onclick="closeEp()">✕</button>
       <h3 id="ep-title"></h3>
       <p class="ep-sub">Selecciona lo que deseas pedir:</p>
       <label class="flabel">Temporada:</label>
       <select id="ep-season"></select>
-      <label class="flabel">Capítulos:</label>
+      <label class="flabel">Capítulos disponibles:</label>
+      <div id="ep-list" class="ep-list"></div>
+      <label class="flabel" style="margin-top:10px">O elegir por tipo:</label>
       <select id="ep-type" onchange="toggleCustom()">
         <option value="completa">Temporada completa</option>
         <option value="serie_completa">Toda la serie</option>
         <option value="custom">Capítulos específicos…</option>
       </select>
       <textarea id="ep-custom" placeholder="Ej: caps 1, 2, 5 al 10…"></textarea>
-      <button class="btn-red" id="ep-confirm">CONFIRMAR</button>
+      <button class="btn-red" style="margin-top:10px" id="ep-confirm">CONFIRMAR</button>
     </div>
   </div>
 

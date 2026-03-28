@@ -377,35 +377,185 @@ window.closeDetail = () => {
 window.startAdd = (id) => {
   curItem = allItems.find(x => x.id === id);
   if (!curItem) return;
-  const isEpisodic = ["Series","Novelas","Anime","Donghua","Animados"].includes(curItem.category);
+
+  const cat = curItem.category;
+
+  // ── SAGAS: mostrar las películas que componen esa saga ──
+  if (cat === "Sagas") {
+    openSagaPicker(curItem);
+    return;
+  }
+
+  // ── EPISÓDICOS: series, novelas, anime, donghua, animados ──
+  const isEpisodic = ["Series","Novelas","Anime","Donghua","Animados"].includes(cat);
   if (isEpisodic) {
-    document.getElementById("ep-title").textContent = curItem.title;
-    const sel = document.getElementById("ep-season");
-    sel.innerHTML = "";
-    const seasons = Number(curItem.seasons) || 1;
-    for (let i=1; i<=seasons; i++)
-      sel.innerHTML += `<option value="${i}">Temporada ${i}</option>`;
-    document.getElementById("ep-type").value = "completa";
-    document.getElementById("ep-custom").style.display = "none";
-    document.getElementById("ep-custom").value = "";
-    openOv("ov-ep");
+    openEpPicker(curItem);
+    return;
+  }
+
+  // ── Todo lo demás (películas, shows, etc.) va directo ──
+  addToCart(curItem, catLabel(cat));
+};
+
+/* ── SELECTOR DE SAGA ─────────────────────────────────────── */
+function openSagaPicker(sagaItem) {
+  // Buscar todas las películas de esa saga en el catálogo
+  const sagaName = sagaItem.title || sagaItem.saga || "";
+  // Coinciden: películas cuyo campo "saga" coincide con el título de la saga,
+  // o cuyo título contiene el nombre de la saga
+  const parts = allItems.filter(i =>
+    i.category === "Peliculas" &&
+    (
+      (i.saga && i.saga.toLowerCase().includes(sagaName.toLowerCase().replace(" collection","").replace(" saga","").trim())) ||
+      (sagaItem.saga && i.saga && i.saga === sagaItem.saga)
+    )
+  ).sort((a,b) => (a.year||"") < (b.year||"") ? -1 : 1);
+
+  const box = document.getElementById("saga-parts");
+  if (!parts.length) {
+    // Sin partes detectadas → ofrecer añadir la saga completa
+    box.innerHTML = `
+      <p style="color:#888;font-size:13px;margin-bottom:14px">
+        No se encontraron partes individuales. Puedes añadir la saga completa.
+      </p>
+      <button class="btn-red" onclick="addToCart(curItem,'Saga completa');closeOv('ov-saga')">
+        Añadir saga completa
+      </button>`;
   } else {
-    addToCart(curItem, catLabel(curItem.category));
+    box.innerHTML = parts.map((p,idx) => `
+      <div class="saga-part" onclick="sagaPartAdd('${p.id}')">
+        <div class="saga-part-num">${idx+1}</div>
+        ${p.poster
+          ? `<img class="saga-part-img" src="${esc(p.poster)}" alt=""/>`
+          : `<div class="saga-part-img saga-part-ph">🎬</div>`}
+        <div class="saga-part-info">
+          <div class="saga-part-title">${esc(p.title)}</div>
+          <div class="saga-part-meta">${p.year||""} ${p.rating?"· ★"+p.rating:""}</div>
+        </div>
+        <div class="saga-part-price">${itemPrice(p)!=="—"?"CUP "+itemPrice(p):""}</div>
+        <button class="saga-part-add">+</button>
+      </div>`).join("") +
+      `<div style="margin-top:14px">
+        <button class="btn-red" onclick="sagaAddAll(${JSON.stringify(parts.map(p=>p.id))})">
+          ➕ Añadir toda la saga (${parts.length} películas)
+        </button>
+      </div>`;
+  }
+
+  document.getElementById("saga-title").textContent = sagaName;
+  openOv("ov-saga");
+}
+
+window.sagaPartAdd = (id) => {
+  const p = allItems.find(i => i.id === id);
+  if (p) { addToCart(p, "Película individual"); closeOv("ov-saga"); }
+};
+
+window.sagaAddAll = (ids) => {
+  ids.forEach(id => {
+    const p = allItems.find(i => i.id === id);
+    if (p) addToCartSilent(p, "Parte de saga");
+  });
+  renderCart();
+  document.getElementById("cart-panel").classList.add("open");
+  toast(`✓ Saga añadida (${ids.length} películas)`);
+  closeOv("ov-saga");
+};
+
+/* ── SELECTOR DE EPISODIOS ────────────────────────────────── */
+function openEpPicker(item) {
+  const seasons = Number(item.seasons) || 1;
+  document.getElementById("ep-title").textContent = item.title;
+
+  // Poblar selector de temporadas
+  const selS = document.getElementById("ep-season");
+  selS.innerHTML = "";
+  for (let i = 1; i <= seasons; i++)
+    selS.innerHTML += `<option value="${i}">Temporada ${i}</option>`;
+
+  // Resetear tipo y capítulos
+  document.getElementById("ep-type").value = "completa";
+  document.getElementById("ep-custom").style.display = "none";
+  document.getElementById("ep-custom").value = "";
+
+  // Actualizar vista de capítulos para la temporada 1
+  updateEpView(item, 1, seasons);
+
+  // Cuando cambia temporada → actualizar vista
+  selS.onchange = () => updateEpView(item, Number(selS.value), seasons);
+
+  openOv("ov-ep");
+}
+
+function updateEpView(item, seasonNum, totalSeasons) {
+  // Intentar obtener episodios de TMDB en background
+  fetchEpisodes(item, seasonNum).then(eps => {
+    renderEpisodeList(eps, seasonNum);
+  });
+}
+
+async function fetchEpisodes(item, season) {
+  const TMDB_KEY = "7307350d0b166058d1b926aad793eeec";
+  const tmdbId   = item.tmdb_id;
+  if (!tmdbId) return [];
+  try {
+    const type = "tv";
+    const r  = await fetch(`https://api.themoviedb.org/3/${type}/${tmdbId}/season/${season}?api_key=${TMDB_KEY}&language=es-ES`);
+    const d  = await r.json();
+    return (d.episodes || []).map(e => ({
+      num:   e.episode_number,
+      name:  e.name,
+      still: e.still_path ? `https://image.tmdb.org/t/p/w185${e.still_path}` : "",
+      air:   (e.air_date||"").substring(0,4),
+    }));
+  } catch(_) { return []; }
+}
+
+function renderEpisodeList(eps, seasonNum) {
+  const container = document.getElementById("ep-list");
+  if (!container) return;
+  if (!eps.length) {
+    container.innerHTML = `<p style="color:#666;font-size:12px;padding:6px 0">No hay información de episodios disponible. Usa el campo de texto abajo.</p>`;
+    return;
+  }
+  container.innerHTML = eps.map(e => `
+    <label class="ep-row">
+      <input type="checkbox" class="ep-check" value="${e.num}" onchange="updateEpSelection()"/>
+      <div class="ep-info">
+        <span class="ep-num">E${String(e.num).padStart(2,"0")}</span>
+        <span class="ep-name">${esc(e.name||"Episodio "+e.num)}</span>
+        ${e.air ? `<span class="ep-year">${e.air}</span>` : ""}
+      </div>
+    </label>`).join("");
+}
+
+window.updateEpSelection = () => {
+  const checks = [...document.querySelectorAll(".ep-check:checked")].map(c => c.value);
+  const manual = document.getElementById("ep-custom");
+  if (checks.length > 0) {
+    manual.value = "Caps " + checks.join(", ");
+    document.getElementById("ep-type").value = "custom";
+    manual.style.display = "block";
   }
 };
 
 window.toggleCustom = () => {
   const v = document.getElementById("ep-type").value;
   document.getElementById("ep-custom").style.display = (v === "custom") ? "block" : "none";
+  if (v !== "custom") {
+    // Desmarcar todos los checkboxes de episodios
+    document.querySelectorAll(".ep-check").forEach(c => c.checked = false);
+  }
 };
 
 document.getElementById("ep-confirm").onclick = () => {
   const s = document.getElementById("ep-season").value;
   const t = document.getElementById("ep-type").value;
   const c = document.getElementById("ep-custom").value;
-  const note = t==="serie_completa" ? "Toda la serie"
+  const note = t==="serie_completa" ? "Serie completa"
               :t==="completa"       ? `Temporada ${s} completa`
-              :                       `T${s}: ${c}`;
+              :c                    ? `T${s}: ${c}`
+              :                       `Temporada ${s}`;
   addToCart(curItem, note);
   closeOv("ov-ep");
 };
@@ -419,6 +569,11 @@ function addToCart(item, note) {
   const panel = document.getElementById("cart-panel");
   panel.classList.add("open");
   toast(`✓ ${item.title} añadido`);
+}
+
+function addToCartSilent(item, note) {
+  const price = itemPrice(item);
+  cart.push({...item, _note:note, _price:price});
 }
 
 /* ── CARRITO ─────────────────────────────────────────────── */
@@ -597,6 +752,7 @@ window.doSearch = (q) => {
 /* ── OVERLAY HELPERS ─────────────────────────────────────── */
 function openOv(id)  { document.getElementById(id).classList.add("open"); document.body.style.overflow="hidden"; }
 function closeOv(id) { document.getElementById(id).classList.remove("open"); document.body.style.overflow=""; }
+window.closeOv = closeOv;
 
 window.ovClose = (e, id) => { if (e.target === document.getElementById(id)) closeOv(id); };
 
