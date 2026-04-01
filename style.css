@@ -1,43 +1,77 @@
-:root { --red:#e50914; --bg:#141414; --bg2:#1a1a1a; --muted:#b3b3b3; }
-body { background:var(--bg); color:#fff; font-family:'DM Sans', sans-serif; margin:0; }
-
-/* NAVBAR Y BUSCADOR */
-.navbar { 
-    position:fixed; top:0; width:100%; height:70px; 
-    display:flex; align-items:center; justify-content:space-between; 
-    padding:0 4%; background:linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); 
-    z-index:1000; transition:background 0.3s; 
+/* ══════════════════════════════════════════════════════════
+   VideoTeca VIP — style.css (CORREGIDO)
+══════════════════════════════════════════════════════════ */
+:root {
+  --red:#e50914; --bg:#141414; --bg2:#1a1a1a; --muted:#b3b3b3; --green:#46d369;
 }
-.navbar.scrolled { background:#000; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:#fff;font-family:'DM Sans',sans-serif;overflow-x:hidden;min-height:100vh}
 
-.search-box { display:flex; align-items:center; flex-direction:row-reverse; gap:5px; }
-#si { width:0; border:none; background:none; color:#fff; transition:0.3s; outline:none; }
-#si.active { width:160px; border-bottom:1px solid #fff; padding:5px; }
-.search-btn { background:none; border:none; color:#fff; cursor:pointer; display:flex; }
+/* AUTH SCREEN - Corregido para centrar */
+#auth-screen {
+  position:fixed;inset:0;z-index:9999;
+  background:#000 url("https://image.tmdb.org/t/p/original/8Y43POKjjkvZM5zDiAaRGs7YHiP.jpg") center/cover;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+}
+#auth-screen::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.65)}
+.auth-card {
+  position:relative;z-index:1;background:rgba(0,0,0,.85);padding:40px;
+  border-radius:8px;width:100%;max-width:400px;text-align:center;
+}
+.auth-logo{font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--red);margin-bottom:8px}
+.auth-logo span{color:#fff}
+#auth-msg{margin-bottom:24px;color:#ccc;font-size:15px}
+
+.auth-card input {
+  width:100%;background:#333;border:none;border-radius:4px;
+  padding:14px;color:#fff;margin-bottom:14px;font-size:15px;outline:none;
+}
+.phone-group{display:flex;background:#333;border-radius:4px;margin-bottom:14px;align-items:center;padding-left:14px}
+.phone-group span{color:var(--muted);font-weight:600;font-size:15px}
+.phone-group input{margin-bottom:0}
+
+.btn-red{width:100%;background:var(--red);color:#fff;border:none;padding:14px;border-radius:4px;font-weight:600;cursor:pointer;font-size:16px;transition:0.2s}
+.btn-red:hover{background:#b81d24}
+#toggleAuth{margin-top:20px;font-size:14px;color:var(--muted);cursor:pointer}
+.auth-err{color:var(--red);font-size:13px;margin-bottom:10px}
+
+/* NAVBAR */
+.navbar {
+  position:fixed;top:0;width:100%;height:70px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 4%;background:linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);z-index:1000;
+}
+.navbar.scrolled{background:#000}
+
+/* BUSCADOR */
+.search-box{display:flex;align-items:center;flex-direction:row-reverse;gap:8px}
+#si{width:0;background:none;border:none;color:#fff;transition:0.3s;outline:none}
+#si.active{width:160px;border-bottom:1px solid #fff;padding:4px}
+.search-btn{background:none;border:none;color:#fff;cursor:pointer;display:flex}
 
 /* TARJETAS */
-.card { position:relative; border-radius:4px; overflow:hidden; cursor:pointer; transition:0.2s; }
-.card:hover { transform:scale(1.05); z-index:10; }
-.card-lbl { padding:8px 0; font-size:13px; transition:0.2s; }
-.card:hover .card-lbl { opacity:0; } /* FIX: Oculta nombre base al hacer hover */
+.card{position:relative;border-radius:4px;overflow:hidden;cursor:pointer;transition:0.2s}
+.card:hover{transform:scale(1.05);z-index:10}
+.card-lbl{padding:8px 0;font-size:13px;transition:0.2s}
+.card:hover .card-lbl{opacity:0} /* FIX: No se superponen nombres */
 
-.card-hov { position:absolute; inset:0; background:rgba(0,0,0,0.75); opacity:0; display:flex; flex-direction:column; justify-content:flex-end; padding:12px; transition:0.2s; }
-.card:hover .card-hov { opacity:1; }
-
-.btn-add-direct { 
-    position:absolute; top:8px; right:8px; background:var(--red); 
-    border:none; color:#fff; width:30px; height:30px; border-radius:50%; 
-    font-weight:bold; cursor:pointer; z-index:20; 
+.btn-add-direct{
+  position:absolute;top:8px;right:8px;background:var(--red);border:none;
+  color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;z-index:20;font-weight:bold;
 }
 
-/* OVERLAYS */
-.overlay { z-index:2000; position:fixed; inset:0; background:rgba(0,0,0,0.85); display:none; }
-.overlay.open { display:flex; justify-content:flex-end; }
-.ov-side { width:360px; background:var(--bg2); height:100%; display:flex; flex-direction:column; box-shadow:-5px 0 20px rgba(0,0,0,0.5); }
+/* CARRITO */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:2000;display:none}
+.overlay.open{display:flex;justify-content:flex-end}
+.ov-side{width:360px;background:var(--bg2);height:100%;display:flex;flex-direction:column}
+.ov-head{padding:20px;border-bottom:1px solid #333;display:flex;justify-content:space-between;align-items:center}
+.ov-body{flex:1;overflow-y:auto;padding:20px}
+.cart-disclaimer{font-size:11px;color:var(--muted);margin-top:15px;border-top:1px solid #333;padding-top:10px;font-style:italic}
 
-/* PEDIDOS EN LÍNEA */
-.order-card { background:#111; padding:12px; border-radius:8px; margin-bottom:10px; border-left:4px solid var(--red); }
-.order-item-line { display:block; font-size:13px; padding:4px 0; border-bottom:1px solid #222; color:#eee; }
+/* NOTICIAS */
+.dot{position:absolute;top:5px;right:5px;width:8px;height:8px;background:var(--red);border-radius:50%}
 
-.cart-disclaimer { font-size:11px; color:var(--muted); margin-top:15px; border-top:1px solid #333; padding-top:10px; font-style:italic; }
-.order-id-display { background:#000; padding:8px; border-radius:4px; text-align:center; color:var(--red); font-weight:bold; border:1px dashed var(--red); margin-bottom:10px; }
+/* RESPONSIVE */
+@media (max-width:768px){
+  .nav-cats{display:none}
+  .ov-side{width:100%}
+}
