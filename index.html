@@ -33,22 +33,22 @@
     </div>
     <div class="nav-right">
       <div class="search-box">
-        <button class="search-btn" id="btn-search-toggle">
+        <button class="search-btn" onclick="toggleSearch()">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         </button>
-        <input type="text" id="si" placeholder="Buscar..."/>
+        <input type="text" id="si" placeholder="Buscar..." oninput="doSearch(this.value)"/>
       </div>
-      
-      <button class="nbtn" id="btn-news-open" style="position:relative">
+
+      <button class="nbtn" onclick="openOv('ov-news')" style="position:relative">
         <span id="news-dot" class="dot" style="display:none"></span>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9J13.73 21a2 2 0 0 1-3.46 0"></path></svg>
       </button>
 
-      <button class="nbtn" id="btn-cart-open">
+      <button class="nbtn" onclick="openOv('ov-cart')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
       </button>
 
-      <button id="btn-mod" class="nbtn" style="display:none">
+      <button id="btn-mod" class="nbtn" style="display:none" onclick="openOv('ov-mod')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
       </button>
     </div>
@@ -57,17 +57,51 @@
   <div id="hero"></div>
   <main id="content"></main>
 
-  <div id="ov-cart" class="overlay"><div class="ov-side"><div class="ov-head"><h3>CARRITO</h3><button class="close-ov">✕</button></div><div id="cart-list" class="ov-body"></div></div></div>
-  <div id="ov-news" class="overlay"><div class="ov-side"><div class="ov-head"><h3>NOTICIAS</h3><button class="close-ov">✕</button></div><div id="news-content" class="ov-body" style="white-space:pre-wrap; padding:20px"></div></div></div>
-  
-  <div id="ov-mod" class="overlay">
-    <div class="ov-side" style="width:400px">
-      <div class="ov-head"><h3>AJUSTES</h3><button class="close-ov">✕</button></div>
+  <div id="ov-news" class="overlay" onclick="ovClose(event,'ov-news')">
+    <div class="ov-side">
+      <div class="ov-head"><h3>NOVEDADES</h3><button onclick="closeOv('ov-news')">✕</button></div>
+      <div id="news-content" class="ov-body" style="padding:20px; white-space:pre-wrap; line-height:1.6;"></div>
+    </div>
+  </div>
+
+  <div id="ov-cart" class="overlay" onclick="ovClose(event,'ov-cart')">
+    <div class="ov-side">
+      <div class="ov-head"><h3>MI PEDIDO</h3><button onclick="closeOv('ov-cart')">✕</button></div>
+      <div id="cart-list" class="ov-body"></div>
+      <div class="cart-footer">
+        <div id="order-id-box" class="order-id-display" style="display:none">ID: <span id="order-id-val"></span></div>
+        <div class="total-row">Total: <span id="cart-total">0</span> CUP</div>
+        <p class="cart-disclaimer">* Precio aproximado según capítulos.</p>
+        <div id="cart-neg-info"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="ov-mod" class="overlay" onclick="ovClose(event,'ov-mod')">
+    <div class="ov-side mod-wide">
+      <div class="ov-head">
+        <div class="mtabs">
+          <button onclick="setMTab('to')">PEDIDOS</button>
+          <button onclick="setMTab('tn')">NEGOCIO</button>
+          <button onclick="setMTab('tm')">MENSAJES</button>
+        </div>
+        <button onclick="closeOv('ov-mod')">✕</button>
+      </div>
       <div class="ov-body">
-        <button class="btn-red" id="clear-orders">BORRAR TODOS LOS PEDIDOS</button>
-        <hr style="margin:20px 0; border:0; border-top:1px solid #333">
-        <textarea id="mod-news-input" placeholder="Noticia para los clientes..." style="width:100%; height:100px; background:#222; color:#fff; padding:10px; border:none"></textarea>
-        <button class="btn-red" id="pub-news" style="margin-top:10px">PUBLICAR NOTICIA</button>
+        <div id="to" class="mtab-body">
+           <button class="btn-red" onclick="clearAllOrders()" style="margin-bottom:10px; font-size:12px; padding:5px">LIMPIAR TODO EL INBOX</button>
+           <div id="orders-list"></div>
+        </div>
+        <div id="tn" class="mtab-body" style="display:none">
+          <input class="mod-input" id="neg-nombre" placeholder="Nombre del negocio"/>
+          <input class="mod-input" id="neg-dir" placeholder="Dirección"/>
+          <input class="mod-input" id="neg-tel" placeholder="Teléfono"/>
+          <button class="btn-red" onclick="saveNegocio()">GUARDAR</button>
+        </div>
+        <div id="tm" class="mtab-body" style="display:none">
+          <textarea id="mod-news-input" class="mod-input" style="height:120px" placeholder="Escribe una noticia..."></textarea>
+          <button class="btn-red" onclick="publishNews()">PUBLICAR NOTICIA</button>
+        </div>
       </div>
     </div>
   </div>
