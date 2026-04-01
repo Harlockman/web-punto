@@ -20,7 +20,7 @@ const FB = {
 };
 
 /* Email que tiene rol de moderador en Firebase Auth */
-const MOD_EMAIL = "moderador@videotecavip.com";
+const MOD_EMAIL = "user54812901@videotecavip.com";
 
 /* ── CATEGORÍAS ──────────────────────────────────────────── */
 const CATS = [
