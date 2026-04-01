@@ -96,7 +96,7 @@ document.getElementById("btnAuth").onclick = async () => {
   const nm  = document.getElementById("reg-name").value.trim();
   const err = document.getElementById("auth-err");
   err.textContent = "";
-  if (ph.length < 7) { err.textContent = "Número inválido (mínimo 7 dígitos)"; return; }
+  if (ph.length = 8) { err.textContent = "Número inválido (mínimo 8 dígitos)"; return; }
   const mail = `user${ph}@videotecavip.com`;
   try {
     if (isLoginMode) {
