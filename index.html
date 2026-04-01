@@ -13,12 +13,19 @@
   <div class="auth-card">
     <div class="auth-logo" id="auth-logo">VIDEOTECA<span>VIP</span></div>
     <p id="auth-msg">Ingresa tus datos para entrar</p>
+    
     <input type="text" id="reg-name" placeholder="Nombre completo" style="display:none"/>
-    <div class="phone-group"><span>+53</span><input type="number" id="phone" placeholder="Número móvil"/></div>
+    
+    <div class="phone-group">
+      <span>+53</span>
+      <input type="number" id="phone" placeholder="Número móvil"/>
+    </div>
     <input type="password" id="pass" placeholder="Contraseña"/>
-    <div id="auth-err" class="auth-err"></div>
+    
+    <div id="auth-err" class="auth-err" style="color:#ff4444; font-size:12px; margin-bottom:10px;"></div>
+    
     <button id="btnAuth" class="btn-red">ENTRAR</button>
-    <p id="toggleAuth"><b>Regístrate aquí</b></p>
+    <p id="toggleAuth" style="cursor:pointer; margin-top:15px; font-size:14px;"><b>¿No tienes cuenta? Regístrate aquí</b></p>
   </div>
 </div>
 
@@ -26,7 +33,8 @@
   <nav class="navbar" id="navbar">
     <div class="nav-left">
       <div class="logo" id="main-logo">VIDEOTECA<span>VIP</span></div>
-      <div class="nav-cats" id="nav-cats"></div>
+      <div class="nav-cats" id="nav-cats">
+          </div>
     </div>
     <div class="nav-right">
       <div class="search-box">
@@ -35,15 +43,22 @@
         </button>
         <input type="text" id="si" placeholder="Buscar..." oninput="doSearch(this.value)"/>
       </div>
-      <button class="nbtn" onclick="openOv('ov-news')" title="Noticias" style="position:relative">
-        <span id="news-dot" class="dot" style="display:none; position:absolute; top:5px; right:5px; width:8px; height:8px; background:var(--red); border-radius:50%"></span>
+      
+      <button class="nbtn" onclick="openOv('ov-news')" style="position:relative">
+        <span id="news-dot" class="dot" style="display:none"></span>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9J13.73 21a2 2 0 0 1-3.46 0"></path></svg>
       </button>
-      <button class="nbtn" onclick="openCart()">
+
+      <button class="nbtn" onclick="openOv('ov-cart')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
       </button>
+
       <button id="btn-mod" class="nbtn" style="display:none" onclick="openOv('ov-mod')">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+      </button>
+      
+      <button class="nbtn" onclick="auth.signOut()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
       </button>
     </div>
   </nav>
@@ -51,58 +66,7 @@
   <div id="hero"></div>
   <main id="content"></main>
 
-  <div id="ov-cart" class="overlay" onclick="ovClose(event,'ov-cart')">
-    <div class="ov-side">
-      <div class="ov-head"><h3>MI PEDIDO</h3><button onclick="closeOv('ov-cart')">✕</button></div>
-      <div id="cart-list" class="ov-body"></div>
-      <div class="cart-footer">
-        <div id="order-id-box" class="order-id-display" style="display:none">Pedido: <span id="order-id-val"></span></div>
-        <div class="total-row">Total estimado: <span id="cart-total">0</span> CUP</div>
-        <p class="cart-disclaimer">* El precio es un aproximado. Los precios están sujetos a cambios y pueden variar según los capítulos.</p>
-        <div id="cart-neg-info" style="font-size:12px; margin-top:10px; color:var(--muted)"></div>
-      </div>
-    </div>
   </div>
-
-  <div id="ov-news" class="overlay" onclick="ovClose(event,'ov-news')">
-    <div class="ov-side">
-      <div class="ov-head"><h3>NOVEDADES</h3><button onclick="closeOv('ov-news')">✕</button></div>
-      <div id="news-content" class="ov-body" style="padding:20px; line-height:1.6"></div>
-    </div>
-  </div>
-
-  <div id="ov-mod" class="overlay" onclick="ovClose(event,'ov-mod')">
-    <div class="ov-side mod-wide">
-      <div class="ov-head">
-        <div class="mtabs">
-          <button onclick="setMTab('to')">PEDIDOS</button>
-          <button onclick="setMTab('tn')">NEGOCIO</button>
-          <button onclick="setMTab('tm')">MENSAJES</button>
-        </div>
-        <button onclick="closeOv('ov-mod')">✕</button>
-      </div>
-      <div class="ov-body">
-        <div id="to" class="mtab-body">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px">
-            <b>Pedidos Recibidos</b>
-            <button class="btn-red" onclick="clearAllOrders()" style="font-size:10px; padding:4px 8px">LIMPIAR TODO</button>
-          </div>
-          <div id="orders-list"></div>
-        </div>
-        <div id="tn" class="mtab-body" style="display:none">
-          <input class="mod-input" id="neg-nombre" placeholder="Nombre del Negocio"/>
-          <input class="mod-input" id="neg-dir" placeholder="Dirección de recogida"/>
-          <input class="mod-input" id="neg-tel" placeholder="Teléfono de contacto"/>
-          <button class="btn-red" onclick="saveNegocio()">GUARDAR CONFIGURACIÓN</button>
-        </div>
-        <div id="tm" class="mtab-body" style="display:none">
-          <textarea id="mod-news-input" class="mod-input" style="height:120px" placeholder="Escribe un mensaje para tus clientes..."></textarea>
-          <button class="btn-red" onclick="publishNews()">PUBLICAR NOTICIA</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <script type="module" src="script.js"></script>
 </body>
