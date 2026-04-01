@@ -1,32 +1,22 @@
-:root { --red:#e50914; --bg:#141414; --bg2:#1a1a1a; --muted:#b3b3b3; }
-*,*::before,*::after{box-sizing:border-box; margin:0; padding:0;}
-body{background:var(--bg); color:#fff; font-family:'DM Sans', sans-serif;}
-
-/* LOGIN CENTRADO */
+/* ── AUTH SCREEN CENTRADO ── */
 #auth-screen {
   position:fixed; inset:0; z-index:9999;
   background:#000 url("https://image.tmdb.org/t/p/original/8Y43POKjjkvZM5zDiAaRGs7YHiP.jpg") center/cover;
   display:flex; align-items:center; justify-content:center;
 }
-#auth-screen::after{ content:''; position:absolute; inset:0; background:rgba(0,0,0,0.7); }
+#auth-screen::after { content:''; position:absolute; inset:0; background:rgba(0,0,0,0.7); }
 .auth-card { position:relative; z-index:1; background:rgba(0,0,0,0.85); padding:40px; border-radius:8px; width:100%; max-width:400px; text-align:center; }
-.auth-logo { font-family:'Bebas Neue'; font-size:40px; color:var(--red); margin-bottom:20px; }
-.auth-logo span { color:#fff; }
-.auth-card input { width:100%; padding:12px; margin-bottom:10px; background:#333; border:none; color:#fff; border-radius:4px; }
-.phone-group { display:flex; background:#333; align-items:center; padding-left:10px; border-radius:4px; margin-bottom:10px; }
-.phone-group input { margin-bottom:0; }
 
-.btn-red { width:100%; background:var(--red); color:#fff; border:none; padding:12px; border-radius:4px; font-weight:bold; cursor:pointer; }
-.auth-err { color:var(--red); font-size:12px; margin-bottom:10px; }
+/* ── HOVER DE TARJETAS (NOMBRES) ── */
+.card { position:relative; overflow:hidden; transition:0.2s; }
+.card-lbl { padding:8px 0; font-size:13px; transition:0.2s; }
+/* Oculta el nombre de abajo cuando el mouse entra en la tarjeta */
+.card:hover .card-lbl { opacity:0; } 
 
-/* APP NAVBAR */
-.navbar { position:fixed; top:0; width:100%; height:70px; display:flex; align-items:center; justify-content:space-between; padding:0 4%; z-index:1000; background:linear-gradient(rgba(0,0,0,0.8),transparent); }
-.search-box { display:flex; align-items:center; flex-direction:row-reverse; }
-#si { width:0; background:none; border:none; color:#fff; transition:0.3s; outline:none; }
-#si.active { width:160px; border-bottom:1px solid #fff; }
-.search-btn { background:none; border:none; color:#fff; cursor:pointer; }
+.card-hov { position:absolute; inset:0; background:rgba(0,0,0,0.8); opacity:0; display:flex; flex-direction:column; justify-content:flex-end; padding:12px; transition:0.2s; }
+.card:hover .card-hov { opacity:1; }
 
-/* OVERLAYS */
-.overlay { position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:2000; display:none; }
-.ov-side { width:350px; background:var(--bg2); height:100%; margin-left:auto; display:flex; flex-direction:column; }
+/* ── OTROS DETALLES ── */
 .dot { position:absolute; top:5px; right:5px; width:8px; height:8px; background:var(--red); border-radius:50%; }
+.mtabs { display:flex; gap:10px; margin-bottom:15px; }
+.mtabs button { background:none; border:none; color:#fff; cursor:pointer; font-family:'Bebas Neue'; font-size:18px; }
