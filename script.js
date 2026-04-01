@@ -1,9 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, onSnapshot, collection, getDocs, deleteDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// TUS CREDENCIALES ORIGINALES
-const firebaseConfig = {
+const FB_CONFIG = {
   apiKey: "AIzaSyDh7oTJqWg9yo87iCQvJCTMGOAy82AFC94",
   authDomain: "mipunto-e32c9.firebaseapp.com",
   projectId: "mipunto-e32c9",
@@ -12,23 +11,23 @@ const firebaseConfig = {
   appId: "1:109212632970:web:d57a11a01f5365fad0aa73"
 };
 
-const app = initializeApp(firebaseConfig);
+const app = initializeApp(FB_CONFIG);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+const MOD_EMAIL = "moderador@videotecavip.com";
 let _orderCode = "";
 let cart = [];
 
-// Función para actualizar el nombre en toda la web
-function applyBranding(name) {
-    const n = name || "VideoTeca VIP";
-    document.title = n;
-    document.querySelectorAll("#main-logo, #auth-logo").forEach(el => {
-        el.innerHTML = `${n.toUpperCase()}`;
-    });
+// --- BRANDING DINÁMICO ---
+function updateBranding(name) {
+    const brand = name || "VideoTeca VIP";
+    document.title = brand;
+    document.getElementById("main-logo-ui").innerHTML = brand.toUpperCase();
+    document.getElementById("auth-logo-ui").innerHTML = brand.toUpperCase();
 }
 
-// Sincronización Real-Time del Carrito
+// --- CARRITO REAL-TIME ---
 window.syncCart = async () => {
     const list = document.getElementById("cart-list");
     let total = 0;
@@ -39,9 +38,10 @@ window.syncCart = async () => {
         const sub = item.qty ? (unit * item.qty) : unit;
         total += sub;
         list.innerHTML += `
-            <div class="order-line">
+            <div style="padding:10px 0; border-bottom:1px solid #333; font-size:14px">
                 <b>${item.title}</b> ${item.qty ? `(${item.qty} caps)` : ''}
-                <span style="float:right">${sub} CUP <button onclick="removeFromCart(${i})">✕</button></span>
+                <div style="color:var(--red); font-weight:bold">${sub} CUP 
+                <button onclick="removeFromCart(${i})" style="float:right; background:none; border:none; color:#fff; cursor:pointer">✕</button></div>
             </div>`;
     });
 
@@ -52,44 +52,37 @@ window.syncCart = async () => {
         document.getElementById("order-id-box").style.display = "block";
         document.getElementById("order-id-val").textContent = _orderCode;
 
-        // Auto-guardar pedido en Firebase (Sincronización en tiempo real)
         await setDoc(doc(db, "pedidos", _orderCode), {
-            cliente: auth.currentUser.displayName || "Usuario",
+            cliente: auth.currentUser.displayName,
             items: cart,
             total: total,
-            date: serverTimestamp()
+            timestamp: serverTimestamp()
         });
     }
 };
 
-// Función para añadir directo desde el "+"
 window.addDirect = (id, e) => {
     e.stopPropagation();
-    // Aquí buscarías en tu array de items cargados (db_items)
     const item = window.db_items?.find(x => x.id === id);
-    if(item) {
-        cart.push({...item});
-        syncCart();
-    }
+    if(item) { cart.push({...item}); window.syncCart(); }
 };
 
-// Moderador: Limpiar Inbox
+// --- MODERADOR: LIMPIAR PEDIDOS ---
 window.clearAllOrders = async () => {
-    if(!confirm("¿Eliminar todos los pedidos recibidos?")) return;
+    if(!confirm("¿Deseas eliminar todos los pedidos del inbox?")) return;
     const snap = await getDocs(collection(db, "pedidos"));
-    snap.forEach(async (d) => await deleteDoc(doc(db, "pedidos", d.id)));
-    alert("Inbox vacío.");
+    const batch = snap.docs.map(d => deleteDoc(doc(db, "pedidos", d.id)));
+    await Promise.all(batch);
 };
 
-// Moderador: Noticias
+// --- NOTICIAS ---
 window.publishNews = async () => {
     const msg = document.getElementById("mod-news-input").value;
     if(!msg) return;
     await setDoc(doc(db, "config", "noticias"), { msg, date: serverTimestamp() });
-    alert("Noticia publicada a los clientes.");
+    alert("Noticia enviada");
 };
 
-// Escuchar Noticias (Campanita)
 onSnapshot(doc(db, "config", "noticias"), (s) => {
     if(s.exists()){
         document.getElementById("news-content").textContent = s.data().msg;
@@ -97,20 +90,40 @@ onSnapshot(doc(db, "config", "noticias"), (s) => {
     }
 });
 
-// Escuchar Configuración de Negocio
-onSnapshot(doc(db, "config", "negocio"), (s) => {
-    if(s.exists()) {
-        const d = s.data();
-        applyBranding(d.nombre);
-        document.getElementById("cart-neg-info").innerHTML = `Recoger en: ${d.dir}<br>Tel: ${d.tel}`;
+// --- SESIÓN Y LOGIN ---
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        document.getElementById("auth-screen").style.display = "none";
+        document.getElementById("app").style.display = "block";
+        document.getElementById("btn-mod").style.display = (user.email === MOD_EMAIL) ? "block" : "none";
+        
+        // Cargar pedidos para el moderador en una sola línea por item
+        if(user.email === MOD_EMAIL) {
+            onSnapshot(query(collection(db, "pedidos"), orderBy("timestamp", "desc")), (snap) => {
+                const container = document.getElementById("orders-list");
+                container.innerHTML = snap.docs.map(d => {
+                    const o = d.data();
+                    return `<div class="order-card">
+                        <div style="font-size:12px; margin-bottom:5px"><b>${o.cliente}</b> (#${d.id})</div>
+                        ${o.items.map(it => `<span class="order-item-line">• ${it.title} ${it.qty||''}</span>`).join('')}
+                        <div style="text-align:right; font-weight:bold; color:var(--red)">${o.total} CUP</div>
+                    </div>`;
+                }).join('');
+            });
+        }
+    } else {
+        document.getElementById("auth-screen").style.display = "flex";
+        document.getElementById("app").style.display = "none";
     }
 });
 
-// Buscador
-window.toggleSearch = () => {
-    const input = document.getElementById("si");
-    input.classList.toggle("active");
-    if(input.classList.contains("active")) input.focus();
-};
+// Listener de configuración de negocio
+onSnapshot(doc(db, "config", "negocio"), (s) => {
+    if(s.exists()){
+        const d = s.data();
+        updateBranding(d.nombre);
+        document.getElementById("cart-neg-info").innerHTML = `<b>Recoger en:</b> ${d.dir}<br><b>WhatsApp:</b> ${d.tel}`;
+    }
+});
 
-// (Resto de funciones de auth y tabs omitidas por brevedad, pero usa las de tu archivo original)
+// (Aquí incluirías el resto de las funciones de abrir/cerrar overlays que ya tenías)
