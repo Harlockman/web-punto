@@ -308,3 +308,92 @@ textarea{display:none;resize:vertical;min-height:68px}
 .mod-input{width:100%;background:#1a1a1a;border:1px solid #2a2a2a;color:#fff;padding:10px 12px;border-radius:5px;font-family:inherit;font-size:13px;outline:none;transition:border .2s}
 .mod-input:focus{border-color:var(--red)}
 .mod-input::placeholder{color:#444}
+
+/* ── ETIQUETA EN EMISIÓN ─────────────────────────────────── */
+.on-air-tag {
+  position:absolute;top:6px;left:6px;
+  background:linear-gradient(135deg,#e50914,#ff4444);
+  color:#fff;font-size:9px;font-weight:700;
+  padding:3px 6px;border-radius:2px;letter-spacing:.4px;
+  animation:pulse-tag 2s ease-in-out infinite;
+  box-shadow:0 0 8px rgba(229,9,20,.6);
+}
+@keyframes pulse-tag {
+  0%,100%{ box-shadow:0 0 6px rgba(229,9,20,.5); }
+  50%     { box-shadow:0 0 14px rgba(229,9,20,.9); }
+}
+.on-air-badge   { background:rgba(229,9,20,.2)!important; border-color:rgba(229,9,20,.6)!important; animation:pulse-tag 2s ease-in-out infinite; }
+.on-air-badge-sm{ background:rgba(229,9,20,.18);border:1px solid rgba(229,9,20,.5);border-radius:3px;color:#ff6666;font-size:11px;padding:2px 8px;animation:pulse-tag 2s ease-in-out infinite; }
+
+/* ── CARRITO: código de pedido arriba ────────────────────── */
+#cart-code-top{
+  background:#0d0d0d;border:1px solid #2a2a2a;border-radius:8px;
+  padding:12px 14px;margin-bottom:12px;text-align:center;
+}
+.cart-code-lbl { font-size:9px;color:#555;text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px; }
+.cart-code-num {
+  font-family:'Bebas Neue',sans-serif;font-size:44px;
+  color:#333;letter-spacing:5px;line-height:1;transition:color .3s;
+}
+.cart-code-hint{ font-size:10px;color:#444;margin-top:4px; }
+
+/* ── MENÚ MÓVIL ──────────────────────────────────────────── */
+.mob-menu-btn { display:none; font-size:20px; }
+
+#mob-menu-overlay {
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);
+  z-index:600;
+}
+#mob-menu-overlay.open { display:block; }
+
+#mob-menu-panel {
+  position:fixed;top:0;left:-280px;width:260px;height:100%;
+  background:#111;z-index:700;transition:left .3s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;border-right:1px solid #1f1f1f;
+  overflow-y:auto;
+}
+#mob-menu-panel.open { left:0; }
+
+.mob-menu-hdr {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 16px;border-bottom:1px solid #1f1f1f;background:#0a0a0a;
+  flex-shrink:0;
+}
+.mob-menu-logo {
+  font-family:'Bebas Neue',sans-serif;font-size:26px;
+  color:var(--red);letter-spacing:2px;
+}
+.mob-menu-close {
+  background:rgba(255,255,255,.08);border:none;color:#fff;
+  width:28px;height:28px;border-radius:50%;cursor:pointer;
+  font-size:14px;display:flex;align-items:center;justify-content:center;
+}
+.mob-menu-close:hover { background:rgba(255,255,255,.16); }
+
+.mob-menu-cats { padding:10px 8px;flex:1; }
+
+.mob-cat {
+  display:flex;align-items:center;width:100%;
+  background:none;border:none;color:var(--muted);
+  font-size:14px;font-family:inherit;cursor:pointer;
+  padding:12px 14px;border-radius:8px;text-align:left;
+  transition:background .15s,color .15s;margin-bottom:2px;
+}
+.mob-cat:hover { background:rgba(255,255,255,.07);color:#fff; }
+.mob-cat.active {
+  background:rgba(229,9,20,.12);color:#fff;
+  border-left:3px solid var(--red);padding-left:11px;
+}
+
+/* ── RESPONSIVE: ocultar nav-cats en móvil ───────────────── */
+@media(max-width:768px){
+  .nav-cats        { display:none!important; }
+  .mob-menu-btn    { display:flex!important; }
+  .card            { min-width:116px;width:116px; }
+  .card-img,.card-ph { width:116px;height:174px; }
+  #cart-panel      { width:100%;right:-100%; }
+  .mbody-grid      { grid-template-columns:1fr; }
+  .mside           { display:none; }
+  .pgrid           { grid-template-columns:1fr; }
+  .mod-mbox        { max-width:100%; }
+}

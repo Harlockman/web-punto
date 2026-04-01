@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>ALTAIR WEB</title>
+<title>VideoTeca VIP</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <link rel="stylesheet" href="style.css"/>
 </head>
@@ -12,12 +12,12 @@
 <!-- ═══ AUTH ════════════════════════════════════════════ -->
 <div id="auth-screen">
   <div class="auth-card">
-    <div class="auth-logo">ALTAIR<span>LOGIN</span></div>
+    <div class="auth-logo">VIDEOTECA<span>VIP</span></div>
     <p id="auth-msg">Ingresa tus datos para entrar</p>
     <input type="text"     id="reg-name" placeholder="Nombre completo" style="display:none"/>
     <div class="phone-group">
       <span>+53</span>
-      <input type="text" id="phone" placeholder="Número móvil (8 dígitos)"/>
+      <input type="number" id="phone" placeholder="Número móvil (8 dígitos)"/>
     </div>
     <input type="password" id="pass" placeholder="Contraseña"/>
     <div id="auth-err" class="auth-err"></div>
@@ -31,7 +31,7 @@
 
   <!-- NAV -->
   <nav id="navbar">
-    <a class="logo" href="#" onclick="showAll();return false">ALTAIR-PC</a>
+    <a class="logo" href="#" onclick="showAll();return false">VIDEOTECA</a>
     <div class="nav-cats" id="nav-cats">
       <button class="ncat active" onclick="navFilter(this,'all')">Inicio</button>
       <button class="ncat" onclick="navFilter(this,'Peliculas')">Películas</button>
@@ -39,12 +39,14 @@
       <button class="ncat" onclick="navFilter(this,'Series')">Series</button>
       <button class="ncat" onclick="navFilter(this,'Novelas')">Novelas</button>
       <button class="ncat" onclick="navFilter(this,'Shows')">Shows</button>
-      <button class="ncat" onclick="navFilter(this,'PeliculasAnimadas')">Anim.</button>
+      <button class="ncat" onclick="navFilter(this,'PeliculasAnimadas')">P.Anim</button>
       <button class="ncat" onclick="navFilter(this,'Animados')">Cartoon</button>
       <button class="ncat" onclick="navFilter(this,'Anime')">Anime</button>
       <button class="ncat" onclick="navFilter(this,'Donghua')">Donghua</button>
     </div>
     <div class="nav-right">
+      <!-- Botón menú solo en móvil -->
+      <button class="nbtn mob-menu-btn" id="mob-menu-btn" onclick="toggleMobMenu()" title="Categorías">☰</button>
       <div class="search-wrap" id="search-wrap">
         <input id="search-input" placeholder="Buscar…" oninput="doSearch(this.value)"/>
       </div>
@@ -55,6 +57,27 @@
       <button class="nbtn cart-btn" onclick="toggleCart()">🛒<span id="cart-count">0</span></button>
     </div>
   </nav>
+
+  <!-- PANEL MENÚ MÓVIL (deslizable desde la izquierda) -->
+  <div id="mob-menu-overlay" onclick="closeMobMenu()"></div>
+  <div id="mob-menu-panel">
+    <div class="mob-menu-hdr">
+      <span class="mob-menu-logo">VIDEOTECA</span>
+      <button class="mob-menu-close" onclick="closeMobMenu()">✕</button>
+    </div>
+    <div class="mob-menu-cats">
+      <button class="mob-cat active" onclick="mobFilter(this,'all')">🏠 Inicio</button>
+      <button class="mob-cat" onclick="mobFilter(this,'Peliculas')">🎬 Películas</button>
+      <button class="mob-cat" onclick="mobFilter(this,'Sagas')">🎞 Sagas</button>
+      <button class="mob-cat" onclick="mobFilter(this,'Series')">📺 Series</button>
+      <button class="mob-cat" onclick="mobFilter(this,'Novelas')">💕 Novelas</button>
+      <button class="mob-cat" onclick="mobFilter(this,'Shows')">🎤 Shows</button>
+      <button class="mob-cat" onclick="mobFilter(this,'PeliculasAnimadas')">✨ Pelí. Animadas</button>
+      <button class="mob-cat" onclick="mobFilter(this,'Animados')">🎨 Cartoon</button>
+      <button class="mob-cat" onclick="mobFilter(this,'Anime')">⛩ Anime</button>
+      <button class="mob-cat" onclick="mobFilter(this,'Donghua')">🐉 Donghua</button>
+    </div>
+  </div>
 
   <!-- HERO -->
   <header id="hero"></header>
@@ -120,17 +143,17 @@
   <div id="cart-panel">
     <span class="cart-close" onclick="toggleCart()">✕</span>
     <h2 class="cart-ttl">MI PEDIDO</h2>
+    <!-- Código siempre visible en la parte superior -->
+    <div id="cart-code-top">
+      <div class="cart-code-lbl">CÓDIGO DE PEDIDO</div>
+      <div class="cart-code-num" id="cart-code-display">—</div>
+      <div class="cart-code-hint">Muéstraselo al dueño del negocio</div>
+    </div>
     <div id="cart-items"></div>
     <div class="cart-foot">
       <div id="cart-address"></div>
       <div class="cart-weight-row"><span id="cart-weight"></span></div>
       <div class="cart-total-row"><span>TOTAL:</span><span id="cart-total">CUP 0</span></div>
-      <button class="btn-red" onclick="checkout()">ENVIAR PEDIDO</button>
-      <div id="code-result">
-        <p class="crlbl">CÓDIGO DE RECOGIDA</p>
-        <div id="code-num"></div>
-        <p class="code-hint">Muéstraselo al dueño del negocio</p>
-      </div>
     </div>
   </div>
 

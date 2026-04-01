@@ -6,8 +6,8 @@ import { getAuth,
          updateProfile }   from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore,
          collection, getDocs, query, orderBy, limit,
-         doc, getDoc, setDoc,
-         addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+         doc, getDoc, setDoc, updateDoc, deleteDoc,
+         addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 /* ── CONFIG ──────────────────────────────────────────────── */
 const FB = {
@@ -80,6 +80,9 @@ let filePrices = {...DEFAULT_FILE};
 let capPrices  = {...DEFAULT_CAP};
 let isLoginMode= true;
 let _trailerKey= null;
+let _orderCode = null;      // código de pedido generado para esta sesión
+let _orderDocId= null;      // ID del documento en Firestore
+let _orderUnsub= null;      // listener de tiempo real del pedido
 
 /* ── FIREBASE ────────────────────────────────────────────── */
 const fbApp = initializeApp(FB);
@@ -202,7 +205,9 @@ function renderHero() {
       <div class="hbg" style="background-image:url('${esc(item.backdrop||item.poster||"")}')"></div>
       <div class="hfade"></div>
       <div class="hcontent">
-        <div class="hbadge">🔴 ${catLabel(item.category)}</div>
+        <div class="hbadge ${item.en_emision?"on-air-badge":""}">
+          ${item.en_emision?"🔴 EN EMISIÓN":"🔴 "+catLabel(item.category)}
+        </div>
         <div class="htitle">${esc(item.title||"")}</div>
         <div class="hmeta">
           ${item.rating?`<span class="hscore">★ ${item.rating}</span>`:""}
@@ -296,9 +301,14 @@ function makeCard(item) {
     ? `<img class="card-img" src="${esc(item.poster)}" alt="${esc(item.title||"")}" loading="lazy"/>`
     : `<div class="card-ph">🎬</div>`;
   const price = itemPrice(item);
+  // Etiquetas: EN EMISIÓN tiene prioridad sobre NUEVO
+  let badge = "";
+  if (item.en_emision) badge = '<span class="on-air-tag">EN EMISIÓN</span>';
+  else if (item.nuevo)  badge = '<span class="new-tag">NUEVO</span>';
+
   div.innerHTML = `
     ${img}
-    ${item.nuevo?'<span class="new-tag">NUEVO</span>':""}
+    ${badge}
     <button class="qadd" onclick="event.stopPropagation();quickAdd('${item.id}')" title="Añadir al carrito">+</button>
     <div class="card-hov">
       <div class="card-hov-name">${esc(item.title||"")}</div>
@@ -344,10 +354,11 @@ window.openDetail = async (id) => {
   document.getElementById("d-plot").textContent  = curItem.plot || curItem.synopsis || "Sin descripción disponible.";
 
   document.getElementById("d-meta").innerHTML = [
-    curItem.rating ? `<span class="dscore">★ ${curItem.rating}</span>` : "",
-    curItem.year   ? `<span>${curItem.year}</span>` : "",
-    curItem.genre  ? `<span class="dbadge">${esc(curItem.genre.split(",")[0])}</span>` : "",
+    curItem.rating    ? `<span class="dscore">★ ${curItem.rating}</span>` : "",
+    curItem.year      ? `<span>${curItem.year}</span>` : "",
+    curItem.genre     ? `<span class="dbadge">${esc(curItem.genre.split(",")[0])}</span>` : "",
     isSeries && curItem.seasons ? `<span class="dbadge">${curItem.seasons} temp.</span>` : "",
+    curItem.en_emision? `<span class="dbadge on-air-badge-sm">🔴 EN EMISIÓN</span>` : "",
     `<span class="dbadge">${catLabel(curItem.category)}</span>`,
   ].filter(Boolean).join("");
 
@@ -601,24 +612,56 @@ document.getElementById("ep-confirm").onclick = () => {
               :t==="completa"       ? `Temporada ${s} completa`
               :c                    ? `T${s}: ${c}`
               :                       `Temporada ${s}`;
-  addToCart(curItem, note);
+
+  // Calcular cantidad de capítulos para el precio
+  let qty = 1;
+  if (t === "serie_completa") {
+    // Toda la serie: contar todos los capítulos conocidos
+    qty = Number(curItem.seasons || 1) * 13; // estimado si no hay dato exacto
+    // Si hay episodios cargados en el DOM, contar los checkboxes
+    const allEps = document.querySelectorAll(".ep-check");
+    if (allEps.length) qty = allEps.length * Number(curItem.seasons || 1);
+  } else if (t === "completa") {
+    // Temporada completa: contar episodios de esa temporada
+    const allEps = document.querySelectorAll(".ep-check");
+    qty = allEps.length || 13; // default 13 si TMDB no cargó
+  } else if (c) {
+    // Capítulos específicos: contar cuántos son
+    const checked = document.querySelectorAll(".ep-check:checked");
+    if (checked.length) {
+      qty = checked.length;
+    } else {
+      // Parsear el texto manualmente "1, 2, 5 al 10"
+      const rangeMatch = c.match(/(\d+)\s+al\s+(\d+)/i);
+      if (rangeMatch) {
+        qty = Math.max(1, parseInt(rangeMatch[2]) - parseInt(rangeMatch[1]) + 1);
+      } else {
+        qty = (c.match(/\d+/g) || []).length || 1;
+      }
+    }
+  }
+
+  addToCart(curItem, note, qty);
   closeOv("ov-ep");
 };
 
 window.closeEp = () => closeOv("ov-ep");
 
-function addToCart(item, note) {
-  const price = itemPrice(item);
-  cart.push({...item, _note:note, _price:price});
-  renderCart();
-  const panel = document.getElementById("cart-panel");
-  panel.classList.add("open");
+function addToCart(item, note, qty) {
+  const unitPrice = (priceMode === "capacidad") ? "—" : (Number(itemPrice(item)) || 0);
+  const numQty    = qty || 1;
+  const lineTotal = unitPrice === "—" ? "—" : unitPrice * numQty;
+  cart.push({...item, _note:note, _price:lineTotal, _unitPrice:unitPrice, _qty:numQty});
+  syncCartToFirebase();
+  document.getElementById("cart-panel").classList.add("open");
   toast(`✓ ${item.title} añadido`);
 }
 
-function addToCartSilent(item, note) {
-  const price = itemPrice(item);
-  cart.push({...item, _note:note, _price:price});
+function addToCartSilent(item, note, qty) {
+  const unitPrice = (priceMode === "capacidad") ? "—" : (Number(itemPrice(item)) || 0);
+  const numQty    = qty || 1;
+  const lineTotal = unitPrice === "—" ? "—" : unitPrice * numQty;
+  cart.push({...item, _note:note, _price:lineTotal, _unitPrice:unitPrice, _qty:numQty});
 }
 
 /* ── CARRITO ─────────────────────────────────────────────── */
@@ -629,12 +672,23 @@ function renderCart() {
 
   count.textContent = cart.length;
   count.style.display = cart.length ? "flex" : "none";
-  document.getElementById("code-result").style.display = "none";
+
+  const codeEl = document.getElementById("cart-code-display");
+  if (codeEl) {
+    if (_orderCode) {
+      codeEl.textContent = "#" + _orderCode;
+      codeEl.style.color = "var(--red)";
+    } else {
+      codeEl.textContent = cart.length ? "Generando…" : "—";
+      codeEl.style.color = cart.length ? "var(--muted)" : "#333";
+    }
+  }
 
   if (!cart.length) {
     items.innerHTML = `<div style="text-align:center;padding:30px 0;color:#555;font-size:13px">Tu pedido está vacío</div>`;
     total.textContent = "CUP 0";
-    document.getElementById("cart-weight").textContent = "";
+    const wEl = document.getElementById("cart-weight");
+    if (wEl) wEl.textContent = "";
     return;
   }
   items.innerHTML = "";
@@ -645,6 +699,12 @@ function renderCart() {
     const bytes = Number(item._bytes) || 0;
     totalBytes += bytes;
     const sizeStr = bytes ? fmtSize(bytes) : "";
+    let priceDetail = "";
+    if (item._price !== "—" && item._unitPrice && item._qty > 1) {
+      priceDetail = `<span class="ci-price">${item._qty} × CUP ${item._unitPrice} = <b>CUP ${item._price}</b></span>`;
+    } else if (item._price !== "—" && item._price) {
+      priceDetail = `<span class="ci-price">CUP ${item._price}</span>`;
+    }
     const div = document.createElement("div");
     div.className = "ci";
     div.innerHTML = `
@@ -653,7 +713,7 @@ function renderCart() {
         <div class="ci-name">${esc(item.title)}</div>
         <div class="ci-note">${esc(item._note||"")}</div>
         <div class="ci-bottom">
-          ${item._price!=="—"?`<span class="ci-price">CUP ${item._price}</span>`:""}
+          ${priceDetail}
           ${sizeStr?`<span class="ci-size">${sizeStr}</span>`:""}
         </div>
       </div>
@@ -661,8 +721,8 @@ function renderCart() {
     items.appendChild(div);
   });
   total.textContent = "CUP " + sum;
-  document.getElementById("cart-weight").textContent =
-    totalBytes ? "Peso total: " + fmtSize(totalBytes) : "";
+  const wEl = document.getElementById("cart-weight");
+  if (wEl) wEl.textContent = totalBytes ? "Peso total: " + fmtSize(totalBytes) : "";
 }
 
 function fmtSize(bytes) {
@@ -673,49 +733,67 @@ function fmtSize(bytes) {
   return Math.round(bytes/1e3) + " KB";
 }
 
-window.removeFromCart = (i) => { cart.splice(i,1); renderCart(); };
+window.removeFromCart = (i) => { cart.splice(i,1); syncCartToFirebase(); };
 
-window.checkout = async () => {
-  if (!cart.length) { toast("El pedido está vacío"); return; }
-  const cod = Math.floor(1000 + Math.random()*9000);
+async function syncCartToFirebase() {
+  const u = auth.currentUser;
+  if (!u) { renderCart(); renderCartAddress(); return; }
+
+  if (!cart.length) {
+    if (_orderDocId) {
+      try { await deleteDoc(doc(db,"pedidos",_orderDocId)); } catch(_){}
+    }
+    _orderCode = null; _orderDocId = null;
+    if (_orderUnsub) { _orderUnsub(); _orderUnsub = null; }
+    renderCart(); renderCartAddress(); return;
+  }
+
+  const total      = cart.reduce((s,c) => s + (Number(c._price)||0), 0);
+  const totalBytes = cart.reduce((s,c) => s + (Number(c._bytes)||0), 0);
+  const rawPhone   = u.email.replace("user","").replace("@videotecavip.com","");
+  const phone      = rawPhone.startsWith("+") ? rawPhone : "+53"+rawPhone;
+
+  const orderData = {
+    cliente:     u.displayName || "Anónimo",
+    telefono:    phone,
+    items:       cart.map(c=>({ titulo:c.title, detalle:c._note, precio:c._price, qty:c._qty||1, bytes:c._bytes||0 })),
+    total, peso_total: totalBytes, modo_precio: priceMode,
+    status: "pendiente", fecha: serverTimestamp(),
+  };
+
   try {
-    const u = auth.currentUser;
-    const total = cart.reduce((s,c)=>s+(Number(c._price)||0),0);
-    const totalBytes = cart.reduce((s,c)=>s+(Number(c._bytes)||0),0);
-    await addDoc(collection(db,"pedidos"),{
-      codigo:    cod,
-      cliente:   u?.displayName || "Anónimo",
-      telefono:  u?.email?.replace("user","").replace("@videotecavip.com","") || "",
-      items:     cart.map(c=>({titulo:c.title, detalle:c._note, precio:c._price, bytes:c._bytes||0})),
-      total,
-      peso_total: totalBytes,
-      modo_precio: priceMode,
-      status:    "pendiente",
-      fecha:     serverTimestamp(),
-    });
-    // Mostrar código y dirección
-    document.getElementById("code-num").textContent = "#" + cod;
-    document.getElementById("code-result").style.display = "block";
-    // Mostrar dirección del negocio si está configurada
-    renderCartAddress();
-    cart = [];
-    renderCart();
-    toast("Pedido enviado — código #" + cod);
-  } catch(e) { toast("Error al enviar: " + e.message); }
-};
+    if (_orderDocId) {
+      await updateDoc(doc(db,"pedidos",_orderDocId), orderData);
+    } else {
+      _orderCode  = String(Math.floor(1000 + Math.random()*9000));
+      const ref   = await addDoc(collection(db,"pedidos"), { ...orderData, codigo: Number(_orderCode) });
+      _orderDocId = ref.id;
+      if (_orderUnsub) _orderUnsub();
+      _orderUnsub = onSnapshot(doc(db,"pedidos",_orderDocId), snap => {
+        if (!snap.exists()) return;
+        const d = snap.data();
+        const el = document.getElementById("cart-code-display");
+        if (el && d.status && d.status !== "pendiente")
+          el.textContent = `#${_orderCode} · ${d.status.toUpperCase()}`;
+      });
+    }
+  } catch(e) { toast("Sync error: " + e.message); }
+
+  renderCart();
+  renderCartAddress();
+}
 
 function renderCartAddress() {
   const el = document.getElementById("cart-address");
   if (!el) return;
-  // La dirección se carga desde config/negocio en Firebase
   getDoc(doc(db,"config","negocio")).then(snap => {
-    if (snap.exists() && snap.data().direccion) {
-      el.innerHTML = `<div class="cart-addr-box">
-        <div class="cart-addr-lbl">📍 Dirección de recogida</div>
-        <div class="cart-addr-val">${esc(snap.data().direccion)}</div>
-        ${snap.data().telefono?`<div class="cart-addr-tel">📞 ${esc(snap.data().telefono)}</div>`:""}
-      </div>`;
-    }
+    if (!snap.exists()) return;
+    const d = snap.data();
+    el.innerHTML = (d.direccion||d.telefono) ? `<div class="cart-addr-box">
+      <div class="cart-addr-lbl">📍 Dirección de recogida</div>
+      ${d.direccion?`<div class="cart-addr-val">${esc(d.direccion)}</div>`:""}
+      ${d.telefono ?`<div class="cart-addr-tel">📞 ${esc(d.telefono)}</div>`:""}
+    </div>` : "";
   }).catch(()=>{});
 }
 
@@ -845,6 +923,35 @@ window.showAll = () => {
   document.querySelectorAll(".ncat").forEach((b,i)=>b.classList.toggle("active",i===0));
   document.getElementById("hero").style.display = "";
   renderSections("all");
+};
+
+/* ── MENÚ MÓVIL ──────────────────────────────────────────── */
+window.toggleMobMenu = () => {
+  const panel   = document.getElementById("mob-menu-panel");
+  const overlay = document.getElementById("mob-menu-overlay");
+  const isOpen  = panel.classList.contains("open");
+  panel.classList.toggle("open", !isOpen);
+  overlay.classList.toggle("open", !isOpen);
+  document.body.style.overflow = isOpen ? "" : "hidden";
+};
+
+window.closeMobMenu = () => {
+  document.getElementById("mob-menu-panel").classList.remove("open");
+  document.getElementById("mob-menu-overlay").classList.remove("open");
+  document.body.style.overflow = "";
+};
+
+window.mobFilter = (btn, cat) => {
+  // Sincronizar con los botones del navbar desktop
+  document.querySelectorAll(".ncat").forEach((b,i) => {
+    const cats = ["all","Peliculas","Sagas","Series","Novelas","Shows","PeliculasAnimadas","Animados","Anime","Donghua"];
+    b.classList.toggle("active", cats[i] === cat);
+  });
+  document.querySelectorAll(".mob-cat").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  document.getElementById("hero").style.display = cat==="all" ? "" : "none";
+  renderSections(cat);
+  closeMobMenu();
 };
 
 window.toggleSearch = () => {
