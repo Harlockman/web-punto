@@ -1,80 +1,74 @@
-:root {
-  --red: #e50914;
-  --bg: #141414;
-  --nav-bg: rgba(20, 20, 20, 0.95);
+/* ══════════════════════════════════════════════════════════
+   VideoTeca VIP — style.css ACTUALIZADO
+══════════════════════════════════════════════════════════ */
+:root{
+  --red:#e50914; --bg:#141414; --nav-bg:rgba(20,20,20,0.95);
 }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:#fff;font-family:'DM Sans',sans-serif;overflow-x:hidden;}
 
-/* ARREGLO DE SUPERPOSICIÓN: Navbar siempre arriba */
+/* CORRECCIÓN DE SUPERPOSICIÓN EN DESKTOP */
 #navbar {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: 70px;
-  background: var(--nav-bg);
-  z-index: 2000;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 4%;
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 70px; background: var(--nav-bg);
+  z-index: 2000 !important; /* Siempre arriba de todo */
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 4%; transition: background .3s;
 }
 
-/* Contenido por debajo de los botones */
 #sections, #hero {
   position: relative;
-  z-index: 10;
+  z-index: 100; /* Por debajo del navbar */
   margin-top: 70px;
 }
 
 /* BUSCADOR: Lupa a la izquierda */
-.search-container {
-  display: flex;
-  flex-direction: row-reverse;
-  align-items: center;
-}
+.search-container { display: flex; flex-direction: row-reverse; align-items: center; }
 .search-wrap {
-  max-width: 0;
-  overflow: hidden;
-  transition: max-width 0.3s ease;
+  max-width: 0; overflow: hidden; transition: max-width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(0,0,0,0.5); border-radius: 4px;
 }
-.search-wrap.active {
-  max-width: 200px;
-  margin-right: 10px;
+.search-wrap.active { max-width: 250px; border: 1px solid #555; margin-right: 10px; }
+#search-input { 
+  background: transparent; border: none; color: #fff; padding: 8px 12px; outline: none; width: 100%;
 }
 
-/* TARJETAS: Evitar nombres duplicados en hover */
-.card { position: relative; overflow: hidden; }
-.card-lbl { transition: opacity 0.2s; }
-.card:hover .card-lbl { opacity: 0; } /* Oculta el nombre base cuando sale el hover info */
+/* TARJETAS: Evitar nombres duplicados */
+.card { position: relative; border-radius: 8px; overflow: hidden; cursor: pointer; transition: transform 0.3s; }
+.card-lbl { position: absolute; bottom: 0; width: 100%; padding: 10px; background: linear-gradient(transparent, rgba(0,0,0,0.9)); transition: opacity 0.2s; }
+.card:hover .card-lbl { opacity: 0; } /* Se oculta para que no choque con el texto del hover info */
 
-/* NOTA CARRITO */
+.card-info-hover {
+  position: absolute; inset: 0; background: rgba(0,0,0,0.8);
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 15px; opacity: 0; transition: opacity 0.3s; z-index: 5;
+}
+.card:hover .card-info-hover { opacity: 1; }
+
+/* NOTA EN CARRITO */
 .cart-note {
-  font-size: 11px;
-  color: #999;
-  margin: 12px 0;
-  line-height: 1.4;
-  text-align: center;
-  font-style: italic;
+  font-size: 11px; color: #aaa; margin: 15px 0; line-height: 1.4;
+  text-align: center; border-top: 1px solid #333; padding-top: 10px; font-style: italic;
 }
 
-/* PEDIDOS EN LÍNEAS */
+/* PEDIDOS EN LÍNEAS INDIVIDUALES */
 .order-line-item {
-  display: block;
-  width: 100%;
-  padding: 4px 0;
-  border-bottom: 1px solid #333;
-  font-size: 13px;
-  color: #eee;
+  display: block; width: 100%; padding: 5px 0; border-bottom: 1px solid #222;
+  font-size: 13px; color: #ddd;
 }
 
 /* BOTÓN LIMPIAR */
 .btn-clear {
-  background: #333;
-  color: #ff4444;
-  border: 1px solid #444;
-  padding: 4px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 11px;
+  background: #222; color: #ff4d4d; border: 1px solid #444; 
+  padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 11px;
 }
+.btn-clear:hover { background: #ff4d4d; color: #fff; }
 
-/* Iconos Lucide */
-.lucide { width: 20px; height: 20px; vertical-align: middle; }
+/* ICONOS LUCIDE */
+.lucide { width: 20px; height: 20px; color: #fff; }
+
+/* OTROS (Simplificado para el ejemplo pero mantén tus anteriores) */
+.btn-red { background: var(--red); color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: 600; }
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 3000; display: none; align-items: center; justify-content: center; }
+.overlay.open { display: flex; }
+.ov-card { background: #181818; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; }
