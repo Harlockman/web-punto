@@ -12,10 +12,13 @@
 
 <div id="auth-screen">
   <div class="auth-card">
-    <div class="auth-logo" id="main-auth-logo">VIDEOTECA<span>VIP</span></div>
+    <div class="auth-logo" id="auth-logo-display">VIDEOTECA<span>VIP</span></div>
     <p id="auth-msg">Ingresa tus datos para entrar</p>
     <input type="text" id="reg-name" placeholder="Nombre completo" style="display:none"/>
-    <div class="phone-group"><span>+53</span><input type="number" id="phone" placeholder="Número móvil"/></div>
+    <div class="phone-group">
+      <span>+53</span>
+      <input type="number" id="phone" placeholder="Número móvil"/>
+    </div>
     <input type="password" id="pass" placeholder="Contraseña"/>
     <div id="auth-err" class="auth-err"></div>
     <button id="btnAuth" class="btn-red">INICIAR SESIÓN</button>
@@ -25,7 +28,7 @@
 
 <nav id="navbar">
   <div class="nav-left">
-    <div class="logo" id="main-logo">VIDEOTECA</div>
+    <div class="logo" id="nav-logo-display" onclick="location.reload()">VIDEOTECA</div>
     <div class="nav-links-desktop">
       <button onclick="filterCat('Peliculas')">Películas</button>
       <button onclick="filterCat('Series')">Series</button>
@@ -38,12 +41,16 @@
     <div class="search-container">
       <button class="nbtn" onclick="toggleSearch()"><i data-lucide="search"></i></button>
       <div class="search-wrap" id="search-wrap">
-        <input id="search-input" placeholder="Buscar..." oninput="doSearch(this.value)"/>
+        <input id="search-input" placeholder="Buscar…" oninput="doSearch(this.value)"/>
       </div>
     </div>
 
-    <button class="nbtn" onclick="openNews()" title="Noticias"><i data-lucide="bell"></i><span id="news-dot" class="news-dot"></span></button>
-    <button class="nbtn" onclick="openPriceList()" title="Precios"><i data-lucide="dollar-sign"></i></button>
+    <button class="nbtn" onclick="openNews()" title="Novedades">
+      <i data-lucide="bell"></i>
+      <span id="news-dot" class="news-dot"></span>
+    </button>
+
+    <button class="nbtn" onclick="openPriceList()" title="Lista de Precios"><i data-lucide="info"></i></button>
     
     <span id="uname" class="uname"></span>
     <button id="mod-btn" class="nbtn mod-hidden" onclick="openMod()"><i data-lucide="settings"></i></button>
@@ -56,10 +63,13 @@
   </div>
 </nav>
 
+<div id="hero" style="display:none"></div>
+<main id="sections"></main>
+
 <div id="v-cart" class="v-side">
   <div class="v-side-header">
     <h3>Tu Pedido</h3>
-    <button onclick="toggleCart()">×</button>
+    <button class="close-btn" onclick="toggleCart()">×</button>
   </div>
   <div id="cart-list" class="v-side-body"></div>
   <div class="cart-footer">
@@ -68,46 +78,67 @@
       <span id="cart-total">0.00</span>
     </div>
     <p class="cart-note">
-      * El precio es un aproximado para su noción. Los precios están sujetos a cambios y variaciones según los capítulos de las series o novelas.
+      * El precio mostrado es un aproximado para que tenga una noción del costo. Los precios están sujetos a cambios y pueden haber variaciones en cuanto a los capítulos de algunas series o novelas.
     </p>
-    <button class="btn-red" onclick="sendOrder()">PEDIR POR WHATSAPP</button>
+    <button class="btn-red" style="width:100%" onclick="sendOrder()">PEDIR POR WHATSAPP</button>
   </div>
 </div>
 
 <div id="mod-panel" class="m-box">
   <div class="m-box-header">
-    <h3>Panel de Control</h3>
+    <h3>Panel Administrativo</h3>
     <button onclick="closeMod()">×</button>
   </div>
+  
   <div class="mtabs">
     <button class="mtab active" onclick="setMTab(this,'tn')">Negocio</button>
     <button class="mtab" onclick="setMTab(this,'tp')">Precios</button>
     <button class="mtab" onclick="setMTab(this,'to')">Pedidos</button>
-    <button class="mtab" onclick="setMTab(this,'tw')">Noticias</button>
+    <button class="mtab" onclick="setMTab(this,'tnews')">Noticias</button>
   </div>
 
   <div id="tn" class="mtab-body">
-    <label>Nombre del Negocio</label>
+    <label class="flabel">Nombre del negocio (Título de la web)</label>
     <input class="mod-input" id="neg-nombre" placeholder="Ej: VideoTeca VIP"/>
-    <button class="btn-red" onclick="saveNegocio()">💾 GUARDAR</button>
+    <button class="btn-red" style="margin-top:10px" onclick="saveNegocio()">💾 GUARDAR</button>
   </div>
 
   <div id="to" class="mtab-body" style="display:none">
-    <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-      <p>Pedidos Recibidos</p>
-      <button class="btn-clear" onclick="clearAllOrders()">🗑️ Limpiar Inbox</button>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <p class="phint">Inbox de pedidos</p>
+        <button class="btn-clear" onclick="clearAllOrders()">🗑️ LIMPIAR TODO</button>
     </div>
     <div id="order-list"></div>
   </div>
 
-  <div id="tw" class="mtab-body" style="display:none">
-    <label>Publicar Noticia o Mensaje</label>
-    <textarea id="mod-news-text" class="mod-input" style="height:100px" placeholder="Escribe algo para tus clientes..."></textarea>
-    <button class="btn-red" onclick="saveNews()">📢 PUBLICAR</button>
+  <div id="tnews" class="mtab-body" style="display:none">
+    <label class="flabel">Publicar Novedad/Mensaje</label>
+    <textarea id="mod-news-input" class="mod-input" style="height:100px" placeholder="Escribe aquí las noticias..."></textarea>
+    <button class="btn-red" style="margin-top:10px" onclick="saveNews()">📢 PUBLICAR NOTICIA</button>
+  </div>
+  
+  <div id="tp" class="mtab-body" style="display:none">
+     <div id="mod-precios-list"></div>
   </div>
 </div>
 
-<main id="sections"></main>
+<div id="ov-news" class="overlay" onclick="ovClose(event,'ov-news')">
+    <div class="ov-card">
+        <h3>Noticias y Novedades</h3>
+        <div id="news-content" style="margin-top:15px; line-height:1.6"></div>
+        <button class="btn-red" style="margin-top:20px" onclick="closeOv('ov-news')">Cerrar</button>
+    </div>
+</div>
+
+<div id="ov-prices" class="overlay" onclick="ovClose(event,'ov-prices')">
+    <div class="ov-card">
+        <h3>Listado de Precios Vigentes</h3>
+        <div id="prices-display-list" style="margin-top:15px"></div>
+        <button class="btn-red" style="margin-top:20px" onclick="closeOv('ov-prices')">Cerrar</button>
+    </div>
+</div>
+
+<div id="v-det" class="v-side v-side-det"></div>
 
 <script type="module" src="script.js"></script>
 </body>
