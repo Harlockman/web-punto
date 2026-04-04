@@ -397,3 +397,113 @@ textarea{display:none;resize:vertical;min-height:68px}
   .pgrid           { grid-template-columns:1fr; }
   .mod-mbox        { max-width:100%; }
 }
+
+/* ── FIXES Z-INDEX: nav SIEMPRE encima del hero/cards ───── */
+nav { z-index:500!important; }
+#hero { z-index:1; }
+#sections { position:relative; z-index:2; }
+/* card hover no sobresalga del nav */
+.card:hover { z-index:10; }
+
+/* ── SEARCH: icono a la izquierda ────────────────────────── */
+.search-icon-btn { order:-1; }
+.search-wrap { order:0; }
+/* cuando está abierto el campo se expande hacia la derecha */
+@media(max-width:768px){
+  .search-wrap.open { max-width:150px; }
+}
+
+/* ── NAVBAR ICONS (SVG, sin emoji) ──────────────────────── */
+.nbtn svg { display:block; pointer-events:none; }
+.nbtn { display:flex; align-items:center; justify-content:center; }
+
+/* ── CAMPANITA ───────────────────────────────────────────── */
+.news-btn { position:relative; }
+#news-bell-badge {
+  position:absolute; top:2px; right:2px;
+  background:var(--red); color:#fff; font-size:9px; font-weight:700;
+  min-width:15px; height:15px; border-radius:8px;
+  display:none; align-items:center; justify-content:center; padding:0 2px;
+}
+
+/* ── PANEL LATERAL GENÉRICO (noticias / precios) ─────────── */
+#news-panel, #price-list-panel {
+  position:fixed; right:-360px; top:0; width:340px; height:100%;
+  background:#111; z-index:900; transition:right .32s;
+  display:flex; flex-direction:column;
+  border-left:1px solid #222; overflow:hidden;
+}
+#news-panel.open, #price-list-panel.open { right:0; }
+#news-overlay, #price-list-overlay {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:899;
+}
+#news-overlay.open, #price-list-overlay.open { display:block; }
+
+.side-panel-hdr {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:18px 18px; border-bottom:1px solid #222;
+  font-family:'Bebas Neue',sans-serif; font-size:18px;
+  background:#0a0a0a; flex-shrink:0;
+}
+.side-panel-close {
+  background:rgba(255,255,255,.08); border:none; color:#fff;
+  width:28px; height:28px; border-radius:50%; cursor:pointer;
+  font-size:14px; display:flex; align-items:center; justify-content:center;
+}
+.side-panel-close:hover { background:rgba(255,255,255,.16); }
+
+/* ── NOTICIAS ────────────────────────────────────────────── */
+.news-list { flex:1; overflow-y:auto; padding:10px 14px; }
+.news-item {
+  background:var(--bg2); border:1px solid #232323; border-radius:8px;
+  padding:12px 14px; margin-bottom:10px;
+}
+.news-date  { font-size:10px; color:#555; margin-bottom:4px; }
+.news-title { font-size:14px; font-weight:600; margin-bottom:5px; }
+.news-body  { font-size:13px; color:#bbb; line-height:1.55; }
+
+/* ── LISTADO DE PRECIOS PÚBLICO ──────────────────────────── */
+.price-list-body { flex:1; overflow-y:auto; padding:0 14px; }
+.pl-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:9px 0; border-bottom:1px solid #1f1f1f; font-size:13px;
+}
+.pl-label { color:#ccc; }
+.pl-price  { color:var(--green); font-weight:700; font-size:14px; }
+.price-list-note {
+  font-size:11px; color:#555; text-align:center;
+  padding:10px 14px 16px; flex-shrink:0; line-height:1.5;
+}
+
+/* ── NOTA PRECIO ESTIMADO EN CARRITO ─────────────────────── */
+.cart-price-note {
+  font-size:11px; color:#555; line-height:1.55;
+  padding:10px 2px 4px; border-top:1px solid #1a1a1a; margin-top:8px;
+}
+.cart-price-note b { color:#777; }
+
+/* ── PEDIDOS MOD: items en línea ─────────────────────────── */
+.orow-client { font-size:12px; color:#888; margin-bottom:5px; }
+.orow-items-list { display:flex; flex-direction:column; gap:3px; }
+.orow-item-line {
+  display:flex; gap:6px; align-items:baseline;
+  background:#161616; border-radius:4px; padding:4px 8px; font-size:12px;
+}
+.orow-item-title { color:#ddd; font-weight:500; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.orow-item-det   { color:#666; font-size:11px; flex-shrink:0; }
+.orow-item-price { color:var(--green); font-size:11px; font-weight:600; flex-shrink:0; margin-left:auto; }
+
+/* ── BOTÓN LIMPIAR BUZÓN ─────────────────────────────────── */
+.btn-clear-orders {
+  background:rgba(229,9,20,.12); border:1px solid rgba(229,9,20,.3);
+  color:var(--red); padding:5px 12px; border-radius:5px; font-size:12px;
+  cursor:pointer; font-family:inherit; transition:background .2s;
+}
+.btn-clear-orders:hover { background:rgba(229,9,20,.25); }
+
+/* ── CARD: quitar nombre duplicado al hacer hover ─────────── */
+.card:hover .card-lbl { opacity:0; }
+
+/* ── FIX: hero padding-top para que quede bajo el nav ──────── */
+#app > header#hero { margin-top:62px; }
+#sections { margin-top:0; }

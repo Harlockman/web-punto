@@ -136,6 +136,11 @@ onAuthStateChanged(auth, async u => {
     if (isMod) document.getElementById("mod-btn").classList.remove("mod-hidden");
     await loadPrices();
     loadCatalog();
+    startNewsListener();
+    // Cargar nombre del negocio para aplicar a toda la UI
+    getDoc(doc(db,"config","negocio")).then(snap=>{
+      if(snap.exists()&&snap.data().nombre) applyNegocioName(snap.data().nombre);
+    }).catch(()=>{});
   } else {
     document.getElementById("auth-screen").style.display = "flex";
     document.getElementById("app").style.display = "none";
@@ -825,6 +830,7 @@ async function loadNegocioConfig() {
       if (el && d.direccion) el.value = d.direccion;
       if (et && d.telefono)  et.value = d.telefono;
       if (en && d.nombre)    en.value = d.nombre;
+      if (d.nombre) applyNegocioName(d.nombre);
     }
   } catch(_) {}
 }
@@ -838,9 +844,16 @@ window.saveNegocio = async () => {
       direccion: dir, telefono: tel, nombre,
       updated: serverTimestamp()
     });
+    applyNegocioName(nombre);
     toast("✓ Datos del negocio guardados");
   } catch(e) { toast("Error: " + e.message); }
 };
+
+function applyNegocioName(nombre) {
+  if (!nombre) return;
+  document.title = nombre;
+  document.querySelectorAll(".brand-name").forEach(el => el.textContent = nombre);
+}
 
 function buildPriceGrids() {
   document.getElementById("pgrid-f").innerHTML = FILE_TYPES.map(c=>`
@@ -877,21 +890,41 @@ async function loadOrders() {
   const el = document.getElementById("orders-list");
   el.innerHTML = `<p style="color:#555;font-size:13px;padding:10px 0">Cargando pedidos…</p>`;
   try {
-    const snap = await getDocs(query(collection(db,"pedidos"), orderBy("fecha","desc"), limit(30)));
+    const snap = await getDocs(query(collection(db,"pedidos"), orderBy("fecha","desc"), limit(60)));
     if (snap.empty) { el.innerHTML=`<p style="color:#555;font-size:13px">Sin pedidos aún.</p>`; return; }
     el.innerHTML = snap.docs.map(d=>{
       const o = d.data();
-      const items_txt = (o.items||[]).map(i=>`${i.titulo} (${i.detalle})`).join(", ");
+      // Cada ítem en su propia línea
+      const itemsHtml = (o.items||[]).map(i=>`
+        <div class="orow-item-line">
+          <span class="orow-item-title">${esc(i.titulo||"")}</span>
+          <span class="orow-item-det">${esc(i.detalle||"")}</span>
+          ${i.precio?`<span class="orow-item-price">CUP ${i.precio}</span>`:""}
+        </div>`).join("");
+      const fecha = o.fecha?.toDate ? o.fecha.toDate().toLocaleString("es",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}) : "";
       return `<div class="orow">
         <div class="orow-hdr">
           <span class="orow-code">#${o.codigo}</span>
           <span class="orow-total">CUP ${o.total||"—"}</span>
         </div>
-        <div class="orow-items">📞 ${esc(o.telefono||o.cliente||"")} · ${items_txt}</div>
+        <div class="orow-client">📞 ${esc(o.telefono||o.cliente||"")} ${fecha?"· "+fecha:""}</div>
+        <div class="orow-items-list">${itemsHtml}</div>
       </div>`;
     }).join("");
   } catch(e) { el.innerHTML=`<p style="color:#f88;font-size:13px">Error: ${e.message}</p>`; }
 }
+
+window.clearAllOrders = async () => {
+  if (!confirm("¿Eliminar TODOS los pedidos? Esta acción no se puede deshacer.")) return;
+  try {
+    const snap = await getDocs(collection(db,"pedidos"));
+    const batches = [];
+    snap.docs.forEach(d => batches.push(deleteDoc(doc(db,"pedidos",d.id))));
+    await Promise.all(batches);
+    toast("✓ Todos los pedidos eliminados");
+    loadOrders();
+  } catch(e) { toast("Error: "+e.message); }
+};
 
 window.setPriceMode = (mode) => {
   priceMode = mode;
@@ -995,3 +1028,119 @@ window.toast = (msg) => {
   el.textContent = msg; el.classList.add("show");
   clearTimeout(el._t); el._t = setTimeout(()=>el.classList.remove("show"), 2600);
 };
+
+/* ── NOTICIAS / NOVEDADES ────────────────────────────────── */
+let _newsUnsub = null;
+let _unreadNews = 0;
+
+function startNewsListener() {
+  if (_newsUnsub) _newsUnsub();
+  _newsUnsub = onSnapshot(
+    query(collection(db,"noticias"), orderBy("fecha","desc"), limit(20)),
+    snap => {
+      const items = snap.docs.map(d=>({id:d.id,...d.data()}));
+      renderNewsBell(items);
+      renderNewsPanel(items);
+    }
+  );
+}
+
+function renderNewsBell(items) {
+  const lastRead = Number(localStorage.getItem("vtvip_news_read")||0);
+  _unreadNews = items.filter(n=>{
+    const ts = n.fecha?.toMillis ? n.fecha.toMillis() : 0;
+    return ts > lastRead;
+  }).length;
+  const bell = document.getElementById("news-bell-badge");
+  if (bell) {
+    bell.textContent = _unreadNews;
+    bell.style.display = _unreadNews > 0 ? "flex" : "none";
+  }
+}
+
+function renderNewsPanel(items) {
+  const el = document.getElementById("news-list");
+  if (!el) return;
+  if (!items.length) {
+    el.innerHTML = `<p style="color:#555;font-size:13px;padding:20px 0;text-align:center">Sin novedades por ahora</p>`;
+    return;
+  }
+  el.innerHTML = items.map(n=>{
+    const fecha = n.fecha?.toDate ? n.fecha.toDate().toLocaleDateString("es",{day:"2-digit",month:"short",year:"numeric"}) : "";
+    return `<div class="news-item">
+      <div class="news-date">${esc(fecha)}</div>
+      <div class="news-title">${esc(n.titulo||"")}</div>
+      <div class="news-body">${esc(n.cuerpo||"")}</div>
+    </div>`;
+  }).join("");
+}
+
+window.toggleNewsPanel = () => {
+  const panel   = document.getElementById("news-panel");
+  const overlay = document.getElementById("news-overlay");
+  const isOpen  = panel.classList.contains("open");
+  panel.classList.toggle("open", !isOpen);
+  overlay.classList.toggle("open", !isOpen);
+  if (!isOpen) {
+    localStorage.setItem("vtvip_news_read", Date.now());
+    renderNewsBell([]);
+  }
+};
+
+window.closeNewsPanel = () => {
+  document.getElementById("news-panel").classList.remove("open");
+  document.getElementById("news-overlay").classList.remove("open");
+};
+
+// Moderador: publicar noticia
+window.publishNews = async () => {
+  const titulo = document.getElementById("news-titulo")?.value?.trim();
+  const cuerpo = document.getElementById("news-cuerpo")?.value?.trim();
+  if (!titulo || !cuerpo) { toast("Completa título y mensaje"); return; }
+  try {
+    await addDoc(collection(db,"noticias"),{
+      titulo, cuerpo, fecha: serverTimestamp(), autor: auth.currentUser?.displayName||"Moderador"
+    });
+    document.getElementById("news-titulo").value = "";
+    document.getElementById("news-cuerpo").value = "";
+    toast("✓ Noticia publicada");
+  } catch(e) { toast("Error: "+e.message); }
+};
+
+window.deleteNews = async (id) => {
+  try { await deleteDoc(doc(db,"noticias",id)); toast("Noticia eliminada"); }
+  catch(e) { toast("Error: "+e.message); }
+};
+
+/* ── LISTADO DE PRECIOS PÚBLICO ──────────────────────────── */
+window.togglePriceList = () => {
+  const panel   = document.getElementById("price-list-panel");
+  const overlay = document.getElementById("price-list-overlay");
+  const isOpen  = panel.classList.contains("open");
+  panel.classList.toggle("open", !isOpen);
+  overlay.classList.toggle("open", !isOpen);
+  if (!isOpen) renderPublicPriceList();
+};
+window.closePriceList = () => {
+  document.getElementById("price-list-panel").classList.remove("open");
+  document.getElementById("price-list-overlay").classList.remove("open");
+};
+
+function renderPublicPriceList() {
+  const el = document.getElementById("price-list-body");
+  if (!el) return;
+  const labels = {
+    pelicula:"Película", saga:"Saga (por película)",
+    cap_serie:"Capítulo de serie", cap_novela:"Capítulo de novela",
+    show:"Show / programa", pelicula_animada:"Película animada",
+    cap_animado:"Cap. animado/cartoon", cap_anime:"Cap. anime japonés",
+    pelicula_anime:"Película anime japonesa", cap_donghua:"Cap. donghua chino",
+    pelicula_donghua:"Película donghua china",
+  };
+  el.innerHTML = Object.entries(filePrices).map(([k,v])=>`
+    <div class="pl-row">
+      <span class="pl-label">${labels[k]||k}</span>
+      <span class="pl-price">CUP ${v}</span>
+    </div>`).join("");
+}
+
