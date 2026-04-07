@@ -20,7 +20,7 @@ const FB = {
 };
 
 /* Email que tiene rol de moderador en Firebase Auth */
-const MOD_EMAIL = "user55944214@videotecavip.com";
+const MOD_EMAIL = "moderador@videotecavip.com";
 
 /* ── CATEGORÍAS ──────────────────────────────────────────── */
 const CATS = [
@@ -810,11 +810,10 @@ window.toggleCart = () => {
 
 /* ── MODERADOR ───────────────────────────────────────────── */
 window.openMod = async () => {
-  buildPriceGrids();
-  buildCatalogList();
-  await loadOrders();
-  await loadNegocioConfig();
-  syncModeButtons();
+  try { buildPriceGrids(); }    catch(_) {}
+  try { await loadOrders(); }   catch(_) {}
+  try { await loadNegocioConfig(); } catch(_) {}
+  try { syncModeButtons(); }    catch(_) {}
   openOv("ov-mod");
 };
 window.closeMod = () => closeOv("ov-mod");
@@ -876,14 +875,21 @@ function buildPriceGrids() {
 }
 
 function buildCatalogList() {
-  document.getElementById("cat-total").textContent = allItems.length;
-  document.getElementById("cat-list").innerHTML = allItems.map(item=>`
+  const tot = document.getElementById("cat-total");
+  const lst = document.getElementById("cat-list");
+  if (tot) tot.textContent = allItems.length;
+  if (!lst) return;
+  lst.innerHTML = allItems.map(item=>`
     <div class="crow">
       ${item.poster?`<img class="crow-img" src="${esc(item.poster)}" alt=""/>`:`<div class="crow-ph">🎬</div>`}
       <span class="crow-ttl">${esc(item.title||"")}</span>
       <span class="crow-cat">${esc(item.category||"")}</span>
       <span class="crow-price">${itemPrice(item)!=="—"?"CUP "+itemPrice(item):""}</span>
     </div>`).join("");
+}
+
+async function loadNewsForMod() {
+  // Noticias se cargan en el panel del cliente via listener
 }
 
 async function loadOrders() {
@@ -1129,7 +1135,8 @@ window.closePriceList = () => {
 function renderPublicPriceList() {
   const el = document.getElementById("price-list-body");
   if (!el) return;
-  const labels = {
+
+  const fileLabels = {
     pelicula:"Película", saga:"Saga (por película)",
     cap_serie:"Capítulo de serie", cap_novela:"Capítulo de novela",
     show:"Show / programa", pelicula_animada:"Película animada",
@@ -1137,10 +1144,27 @@ function renderPublicPriceList() {
     pelicula_anime:"Película anime japonesa", cap_donghua:"Cap. donghua chino",
     pelicula_donghua:"Película donghua china",
   };
-  el.innerHTML = Object.entries(filePrices).map(([k,v])=>`
-    <div class="pl-row">
-      <span class="pl-label">${labels[k]||k}</span>
-      <span class="pl-price">CUP ${v}</span>
-    </div>`).join("");
+  const capLabels = {
+    "1gb":"1 GB","2gb":"2 GB","4gb":"4 GB","8gb":"8 GB",
+    "16gb":"16 GB","32gb":"32 GB","64gb":"64 GB","128gb":"128 GB",
+  };
+
+  if (priceMode === "capacidad") {
+    // Mostrar precios por capacidad
+    el.innerHTML = `<div class="pl-mode-badge">Por capacidad de almacenamiento</div>` +
+      Object.entries(capPrices).map(([k,v])=>`
+        <div class="pl-row">
+          <span class="pl-label">${capLabels[k]||k}</span>
+          <span class="pl-price">CUP ${v}</span>
+        </div>`).join("");
+  } else {
+    // Mostrar precios por fichero (modo default)
+    el.innerHTML = `<div class="pl-mode-badge">Por tipo de fichero</div>` +
+      Object.entries(filePrices).map(([k,v])=>`
+        <div class="pl-row">
+          <span class="pl-label">${fileLabels[k]||k}</span>
+          <span class="pl-price">CUP ${v}</span>
+        </div>`).join("");
+  }
 }
 
