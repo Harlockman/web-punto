@@ -1,0 +1,23 @@
+#auth-screen {
+  position: fixed; inset: 0;
+  background: #000 url("https://image.tmdb.org/t/p/original/8Y43POKjjkvZM5zDiAaRGs7YHiP.jpg") center/cover;
+  z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+#auth-screen::after { content: ''; position: absolute; inset: 0; background: rgba(0,0,0,.7); }
+.auth-card {
+  position: relative; z-index: 1; background: rgba(0,0,0,0.85); padding: 40px;
+  border-radius: 8px; width: 100%; max-width: 400px; text-align: center;
+  border: 1px solid #333; backdrop-filter: blur(10px);
+}
+.auth-logo { font-family: 'Bebas Neue'; font-size: 48px; color: #e50914; margin-bottom: 20px; }
+.auth-card input {
+  width: 100%; padding: 14px; margin: 10px 0; background: #333;
+  border: none; color: #fff; border-radius: 4px; font-size: 16px;
+}
+.auth-err { color: #e50914; font-size: 14px; margin-top: 10px; min-height: 1.2em; }
+.btn-auth {
+  width: 100%; padding: 14px; background: #e50914; color: #fff; border: none;
+  border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 20px;
+}
+.auth-switch { margin-top: 20px; font-size: 14px; color: #b3b3b3; cursor: pointer; }
+.auth-switch b { color: #fff; }
