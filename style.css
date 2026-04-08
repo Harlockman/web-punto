@@ -373,13 +373,18 @@ nav{
 
 .rowscroll{
   display:flex;
+  flex-wrap:nowrap;
   gap:11px;
-  overflow:auto;
+  overflow-x:auto;
+  overflow-y:hidden;
   padding-bottom:8px;
+  width:100%;
   scrollbar-width:thin;
+  -webkit-overflow-scrolling:touch;
 }
 .rowscroll .card{
   flex:0 0 150px;
+  width:150px;
 }
 .cardgrid{
   display:grid;

@@ -278,7 +278,7 @@ function renderSections(filter) {
     else
       items = allItems.filter(i => i.category === c.key);
     if (!items.length) return;
-    wrap.appendChild(buildSection(c.label, items, c.key, false));
+    wrap.appendChild(buildSection(c.label, items, c.key, true));
   });
 
   if (!wrap.children.length)
@@ -300,7 +300,7 @@ function buildSection(title, items, secId, gridMode) {
     </div>`;
 
   const row = document.createElement("div");
-  row.className = gridMode ? "cardgrid" : "rowscroll";
+  row.className = "cardgrid";
   row.id = uid;
   items.forEach(item => row.appendChild(makeCard(item)));
   div.appendChild(row);
@@ -1052,7 +1052,7 @@ window.doSearch = (q) => {
   wrap.innerHTML = "";
   setHeroVisible(false);
   if (!hits.length) { wrap.innerHTML=`<p style="color:#666;padding:40px 4%">Sin resultados para "${esc(q)}"</p>`; return; }
-  wrap.appendChild(buildSection(`Resultados: "${esc(q)}"`, hits, "_search", false));
+  wrap.appendChild(buildSection(`Resultados: "${esc(q)}"`, hits, "_search", true));
 };
 
 
