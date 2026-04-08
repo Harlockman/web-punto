@@ -1,207 +1,756 @@
+/* ══════════════════════════════════════════════════════════
+   VideoTeca VIP — style.css
+══════════════════════════════════════════════════════════ */
+:root{
+  --red:#e50914; --red2:#b81d24;
+  --bg:#141414;  --bg2:#1a1a1a; --bg3:#222;
+  --green:#46d369; --muted:#b3b3b3; --gold:#f5c518;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:#fff;font-family:'DM Sans',sans-serif;overflow-x:hidden;min-height:100vh}
 
+/* ── AUTH ───────────────────────────────────────────────── */
+#auth-screen{
+  position:fixed;inset:0;background:#000 url("https://image.tmdb.org/t/p/original/8Y43POKjjkvZM5zDiAaRGs7YHiP.jpg") center/cover;
+  z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;
+}
+#auth-screen::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,.62)}
+.auth-card{
+  position:relative;z-index:1;background:rgba(0,0,0,.82);padding:36px 32px;
+  border-radius:10px;width:100%;max-width:380px;text-align:center;
+  border:1px solid #2a2a2a;backdrop-filter:blur(10px);
+}
+.auth-logo{font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--red);letter-spacing:3px;display:block;margin-bottom:4px}
+.auth-logo span{color:#fff;font-size:26px;vertical-align:super}
+#auth-msg{color:#888;font-size:14px;margin-bottom:18px}
+.auth-card input{
+  width:100%;padding:12px 14px;margin:7px 0;background:#222;
+  border:1px solid #3a3a3a;color:#fff;border-radius:5px;
+  outline:none;font-family:inherit;font-size:14px;transition:border .2s;
+}
+.auth-card input:focus{border-color:var(--red)}
+.auth-card input::placeholder{color:#555}
+.phone-group{display:flex;background:#222;border:1px solid #3a3a3a;border-radius:5px;align-items:center;margin:7px 0;transition:border .2s}
+.phone-group:focus-within{border-color:var(--red)}
+.phone-group span{padding:0 13px;font-weight:600;color:#666;font-size:14px;border-right:1px solid #3a3a3a;white-space:nowrap}
+.phone-group input{border:none;margin:0;flex:1}
+.auth-err{color:#ff6b6b;font-size:12px;min-height:16px;margin:4px 0}
+#toggleAuth{margin-top:14px;cursor:pointer;color:#888;font-size:13px}
+#toggleAuth b{color:var(--red)}
 
-/* ═══════════════════════════════════════════════════════
-   VIDEOTECA v8 — definitivo
-═══════════════════════════════════════════════════════ */
+/* ── NAVBAR ─────────────────────────────────────────────── */
+nav{
+  position:fixed;top:0;left:0;right:0;height:62px;z-index:500;
+  display:flex;align-items:center;padding:0 3%;
+  background:linear-gradient(to bottom,rgba(0,0,0,.9),transparent);
+  transition:background .3s;gap:0;
+}
+nav.scrolled{background:rgba(18,18,18,.98);border-bottom:1px solid #1f1f1f}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--red);text-decoration:none;letter-spacing:2px;flex-shrink:0;margin-right:14px}
+.nav-cats{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;flex:1}
+.nav-cats::-webkit-scrollbar{display:none}
+.ncat{background:none;border:none;color:var(--muted);font-size:12.5px;cursor:pointer;padding:5px 9px;border-radius:4px;font-family:inherit;transition:color .2s,background .2s;white-space:nowrap}
+.ncat:hover,.ncat.active{color:#fff;background:rgba(255,255,255,.09)}
+.nav-right{display:flex;align-items:center;gap:3px;flex-shrink:0;margin-left:10px}
+.uname{font-size:12px;color:var(--muted);margin:0 5px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nbtn{background:none;border:none;color:#fff;cursor:pointer;padding:7px 8px;font-size:16px;border-radius:5px;transition:background .2s;position:relative;font-family:inherit}
+.nbtn:hover{background:rgba(255,255,255,.1)}
+.cart-btn{font-size:18px}
+#cart-count{position:absolute;top:1px;right:1px;background:var(--red);color:#fff;font-size:9px;font-weight:700;min-width:15px;height:15px;border-radius:8px;display:none;align-items:center;justify-content:center;padding:0 2px}
+.mod-hidden{display:none!important}
+.search-wrap{display:flex;align-items:center;background:rgba(0,0,0,.5);border:1px solid #444;border-radius:4px;overflow:hidden;max-width:0;transition:max-width .3s,opacity .3s;opacity:0}
+.search-wrap.open{max-width:190px;opacity:1}
+.search-wrap input{background:none;border:none;color:#fff;padding:6px 11px;font-size:13px;outline:none;width:170px;font-family:inherit}
+.search-wrap input::placeholder{color:#666}
 
-/* ── Visibilidad desktop/mobile ────────────────────────── */
-.desk-only { display:flex !important; }
-.mob-only  { display:none  !important; }
+/* ── HERO ────────────────────────────────────────────────── */
+#hero{min-height:72vh;position:relative;overflow:hidden;background:#000}
+.hslide{position:absolute;inset:0;opacity:0;transition:opacity 1.1s;display:flex;align-items:flex-end;padding:0 4% 8%}
+.hslide.active{opacity:1;z-index:2}
+.hbg{position:absolute;inset:0;background-size:cover;background-position:center top}
+.hfade{position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,.88) 0%,rgba(0,0,0,.3) 55%,transparent 100%),linear-gradient(to top,rgba(20,20,20,1) 0%,rgba(20,20,20,.2) 20%,transparent 40%)}
+.hcontent{position:relative;z-index:3;max-width:520px}
+.hbadge{display:inline-block;background:rgba(229,9,20,.14);border:1px solid rgba(229,9,20,.4);color:var(--red);font-size:11px;font-weight:600;padding:3px 10px;border-radius:3px;margin-bottom:12px;letter-spacing:.7px;text-transform:uppercase}
+.htitle{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,7vw,66px);line-height:.93;margin-bottom:10px;text-shadow:1px 2px 8px rgba(0,0,0,.7)}
+.hmeta{color:var(--muted);font-size:13px;margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.hscore{color:var(--green);font-weight:700}
+.hdesc{font-size:14px;color:#ccc;line-height:1.6;margin-bottom:18px;max-width:380px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.hbtns{display:flex;gap:10px;flex-wrap:wrap}
+.btn-play{background:#fff;color:#000;border:none;padding:10px 22px;border-radius:5px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:7px;transition:background .2s;font-family:inherit}
+.btn-play:hover{background:#ddd}
+.btn-more{background:rgba(109,109,110,.6);color:#fff;border:none;padding:10px 22px;border-radius:5px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;transition:background .2s;font-family:inherit}
+.btn-more:hover{background:rgba(109,109,110,.85)}
 
+/* ── SECTIONS ────────────────────────────────────────────── */
+#sections{padding:4px 4% 60px}
+.secblock{margin-bottom:34px}
+.sectitle{font-family:'Bebas Neue',sans-serif;font-size:21px;margin-bottom:11px;border-left:3px solid var(--red);padding-left:9px;letter-spacing:.4px}
+.rowscroll{display:flex;gap:7px;overflow-x:auto;padding-bottom:5px;scrollbar-width:none}
+.rowscroll::-webkit-scrollbar{display:none}
+
+/* ── CARD ────────────────────────────────────────────────── */
+.card{min-width:146px;width:146px;border-radius:5px;overflow:hidden;cursor:pointer;position:relative;flex-shrink:0;background:var(--bg2);transition:transform .22s,z-index 0s .22s}
+.card:hover{transform:scale(1.07);z-index:10;transition:transform .22s,z-index 0s}
+.card-img{width:146px;height:220px;object-fit:cover;display:block}
+.card-ph{width:146px;height:220px;display:flex;align-items:center;justify-content:center;font-size:44px;background:#111}
+.card-lbl{padding:7px 8px 9px;font-size:11px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:var(--bg2)}
+.card-hov{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.92));padding:24px 8px 8px;opacity:0;transition:opacity .18s}
+.card:hover .card-hov{opacity:1}
+.card-hov-name{font-size:11px;font-weight:600;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-hov-meta{color:var(--green);font-size:10px}
+.new-tag{position:absolute;top:6px;left:6px;background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:2px 5px;border-radius:2px}
+.qadd{position:absolute;bottom:34px;right:7px;background:var(--red);color:#fff;width:30px;height:30px;border-radius:50%;border:none;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.6);transition:background .15s;line-height:1}
+.qadd:hover{background:var(--red2)}
+
+/* ── OVERLAY / MODALES ───────────────────────────────────── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:800;display:none;align-items:center;justify-content:center;padding:16px;overflow-y:auto}
+.overlay.open{display:flex}
+.mbox{background:#181818;width:100%;max-width:840px;border-radius:10px;border:1px solid #252525;overflow:hidden;position:relative;margin:auto;max-height:92vh;overflow-y:auto}
+.mclose{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.7);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:15px;z-index:10;display:flex;align-items:center;justify-content:center}
+.mclose:hover{background:rgba(255,255,255,.15)}
+.small-mbox{max-width:460px;padding:26px}
+.small-mbox h3{font-family:'Bebas Neue',sans-serif;font-size:23px;margin-bottom:4px}
+.ep-sub{color:#888;font-size:13px;margin:6px 0 14px}
+.vbox{width:100%;aspect-ratio:16/9;background:#000;flex-shrink:0}
+.vbox img{width:100%;height:100%;object-fit:cover;display:block}
+.vbox iframe{width:100%;height:100%;border:none;display:block}
+.vbox-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:72px;background:#0a0a12}
+.mbody{padding:18px 24px 24px}
+.mbody-grid{display:grid;grid-template-columns:1fr 220px;gap:24px}
+@media(max-width:600px){.mbody-grid{grid-template-columns:1fr}.mbody-right{display:none}.mbody{padding:14px 15px 20px}}
+h2#d-title{font-family:'Bebas Neue',sans-serif;font-size:32px;margin-bottom:6px}
+.d-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px;color:var(--muted);margin-bottom:12px}
+.dscore{color:var(--green);font-weight:700;font-size:14px}
+.dbadge{border:1px solid #444;padding:2px 7px;border-radius:3px;color:#ccc;font-size:11px}
+#d-plot{font-size:14px;line-height:1.65;color:#ccc;margin-bottom:14px}
+.d-extra{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.8}
+.d-extra b{color:#ddd}
+.d-actions{display:flex;gap:9px;flex-wrap:wrap}
+.btn-add-big{background:var(--red);color:#fff;border:none;padding:10px 18px;border-radius:5px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .2s}
+.btn-add-big:hover{background:var(--red2)}
+.mbody-right{font-size:13px;line-height:1.9;color:var(--muted)}
+.mbody-right b{color:#ddd}
+.price-block{margin-top:14px;padding:12px;background:var(--bg3);border-radius:7px}
+.price-lbl{font-size:11px;color:var(--muted);margin-bottom:3px}
+.price-val{font-size:24px;font-weight:700;color:var(--green)}
+
+/* ── CARRITO ─────────────────────────────────────────────── */
+#cart-panel{position:fixed;right:-370px;top:0;width:350px;height:100%;background:#111;z-index:900;transition:right .32s;padding:20px;display:flex;flex-direction:column;border-left:1px solid #222;overflow-y:auto}
+#cart-panel.open{right:0}
+.cart-close{position:absolute;top:16px;right:16px;cursor:pointer;font-size:17px;color:#666}
+.cart-close:hover{color:#fff}
+.cart-ttl{font-family:'Bebas Neue',sans-serif;font-size:22px;margin:6px 0 14px}
+#cart-items{flex:1;overflow-y:auto}
+.ci{display:flex;gap:9px;padding:9px;background:var(--bg2);border-radius:6px;margin-bottom:8px;align-items:center;border:1px solid #232323}
+.ci-img{width:38px;height:54px;object-fit:cover;border-radius:3px;flex-shrink:0;display:block}
+.ci-ph{width:38px;height:54px;background:#1a1a2e;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.ci-info{flex:1;min-width:0}
+.ci-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ci-note{font-size:11px;color:var(--muted);margin-top:1px}
+.ci-price{font-size:12px;color:var(--green);font-weight:600;margin-top:3px}
+.ci-rm{background:none;border:none;color:#555;cursor:pointer;font-size:15px;padding:3px;flex-shrink:0}
+.ci-rm:hover{color:var(--red)}
+.cart-foot{border-top:1px solid #222;padding-top:14px;margin-top:10px}
+.cart-total-row{display:flex;justify-content:space-between;font-size:18px;font-weight:700;margin-bottom:13px}
+#code-result{display:none;text-align:center;margin-top:12px;border:1px dashed var(--red);border-radius:7px;padding:14px}
+#code-result>p:first-child{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+#code-num{font-family:'Bebas Neue',sans-serif;font-size:50px;color:var(--red);letter-spacing:6px;line-height:1}
+.code-hint{font-size:11px;color:#555;margin-top:5px}
+
+/* ── MODERADOR ───────────────────────────────────────────── */
+.mod-mbox{max-width:660px;padding:0}
+.mod-hdr{background:linear-gradient(135deg,#1a0808,#280a0a);padding:16px 22px;border-bottom:1px solid #350a0a}
+.mod-badge{background:rgba(229,9,20,.14);border:1px solid rgba(229,9,20,.38);color:var(--red);font-size:12px;font-weight:600;padding:4px 12px;border-radius:3px;letter-spacing:.8px}
+.mod-tabs{display:flex;border-bottom:1px solid #232323}
+.mtab{flex:1;padding:11px;background:none;border:none;color:var(--muted);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;transition:all .2s}
+.mtab:hover{color:#fff}
+.mtab.active{color:#fff;border-bottom-color:var(--red)}
+.mtab-body{padding:18px 22px 22px}
+.mode-row{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.mode-lbl{font-size:13px;color:var(--muted);font-weight:500}
+.mode-group{display:flex;background:#161616;border-radius:6px;padding:3px;gap:3px;border:1px solid #2a2a2a}
+.mbtn{padding:7px 15px;background:none;border:none;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;border-radius:4px;font-family:inherit;transition:all .2s}
+.mbtn.active{background:var(--red);color:#fff}
+.phint{font-size:12px;color:#555;margin-bottom:13px}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+@media(max-width:500px){.pgrid{grid-template-columns:1fr}}
+.prow{background:#161616;border:1px solid #232323;border-radius:7px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.prow-lbl{font-size:12px;color:#ccc;font-weight:500}
+.pinput-wrap{display:flex;align-items:center;gap:5px}
+.pinput{width:70px;background:#0d0d0d;border:1px solid #2a2a2a;color:var(--green);padding:5px 7px;border-radius:4px;font-size:13px;font-weight:700;text-align:right;outline:none;font-family:inherit}
+.pinput:focus{border-color:var(--red)}
+.pcur{font-size:11px;color:#444}
+.cat-list{max-height:320px;overflow-y:auto}
+.crow{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid #1f1f1f;font-size:13px}
+.crow-img{width:28px;height:40px;object-fit:cover;border-radius:3px;flex-shrink:0}
+.crow-ph{width:28px;height:40px;background:#1a1a2e;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.crow-ttl{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.crow-cat{font-size:10px;color:var(--muted);background:#222;padding:2px 5px;border-radius:3px;flex-shrink:0}
+.crow-price{font-size:12px;color:var(--green);font-weight:600;flex-shrink:0}
+.orow{background:#161616;border-radius:6px;padding:11px 14px;margin-bottom:8px;border:1px solid #232323}
+.orow-hdr{display:flex;justify-content:space-between;margin-bottom:5px}
+.orow-code{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--red)}
+.orow-total{color:var(--green);font-weight:700}
+.orow-items{font-size:12px;color:var(--muted);line-height:1.6}
+
+/* ── FORMS ───────────────────────────────────────────────── */
+.flabel{display:block;font-size:11px;color:var(--muted);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.5px}
+select,textarea{width:100%;background:#1e1e1e;border:1px solid #333;color:#fff;padding:10px 12px;border-radius:5px;margin-bottom:4px;font-family:inherit;font-size:13px;outline:none;transition:border .2s}
+select:focus,textarea:focus{border-color:var(--red)}
+textarea{display:none;resize:vertical;min-height:68px}
+.btn-red{background:var(--red);color:#fff;border:none;padding:12px 18px;border-radius:5px;font-weight:700;cursor:pointer;transition:background .2s;font-family:inherit;font-size:14px;width:100%}
+.btn-red:hover{background:var(--red2)}
+
+/* ── TOAST ───────────────────────────────────────────────── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(14px);background:#fff;color:#000;padding:10px 20px;border-radius:28px;font-size:13px;font-weight:600;z-index:9999;opacity:0;transition:all .26s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── MOBILE ──────────────────────────────────────────────── */
 @media(max-width:768px){
-  .desk-only { display:none  !important; }
-  .mob-only  { display:flex  !important; }
-  .nav-cats  { display:none  !important; }
+  .nav-cats{max-width:60vw}
+  .card{min-width:116px;width:116px}
+  .card-img,.card-ph{width:116px;height:174px}
+  #cart-panel{width:100%;right:-100%}
+  .mod-mbox{max-width:100%}
+  .pgrid{grid-template-columns:1fr}
 }
 
-/* ── NAV fijo siempre encima ────────────────────────────── */
-nav {
-  position:fixed !important;
-  top:0; left:0; right:0; height:62px;
-  z-index:500 !important;
+/* ── SAGA PICKER ──────────────────────────────────────────── */
+.saga-part{display:flex;align-items:center;gap:10px;padding:10px;background:#1a1a1a;border-radius:7px;margin-bottom:8px;cursor:pointer;border:1px solid #232323;transition:background .15s}
+.saga-part:hover{background:#252525}
+.saga-part-num{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--red);min-width:28px;text-align:center;flex-shrink:0}
+.saga-part-img{width:40px;height:58px;object-fit:cover;border-radius:4px;flex-shrink:0;display:block}
+.saga-part-ph{background:#1a1a2e;display:flex;align-items:center;justify-content:center;font-size:18px}
+.saga-part-info{flex:1;min-width:0}
+.saga-part-title{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.saga-part-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.saga-part-price{font-size:12px;color:var(--green);font-weight:700;white-space:nowrap;flex-shrink:0}
+.saga-part-add{background:var(--red);border:none;color:#fff;width:26px;height:26px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1}
+.saga-part-add:hover{background:var(--red2)}
+
+/* ── EPISODE LIST ─────────────────────────────────────────── */
+.ep-list{max-height:220px;overflow-y:auto;border:1px solid #2a2a2a;border-radius:6px;background:#111;margin-bottom:8px}
+.ep-row{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;border-bottom:1px solid #1a1a1a;transition:background .12s}
+.ep-row:last-child{border-bottom:none}
+.ep-row:hover{background:#1a1a1a}
+.ep-row input[type=checkbox]{accent-color:var(--red);width:15px;height:15px;flex-shrink:0;cursor:pointer}
+.ep-info{display:flex;align-items:center;gap:7px;flex:1;min-width:0}
+.ep-num{font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--red);min-width:30px;flex-shrink:0}
+.ep-name{font-size:12px;color:#ccc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ep-year{font-size:10px;color:#555;flex-shrink:0}
+
+/* ── SEC HEADER CON FLECHAS ───────────────────────────────── */
+.sec-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 11px;
+  padding-right: 2px;
+}
+.sec-arrows {
+  display: flex;
+  gap: 6px;
+  opacity: 0;
+  transition: opacity .25s;
+}
+.secblock:hover .sec-arrows { opacity: 1; }
+.sec-arrow {
+  width: 32px; height: 32px;
+  background: rgba(229,9,20,.12);
+  border: 1px solid rgba(229,9,20,.35);
+  color: #fff;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .18s, border-color .18s, transform .15s;
+  padding: 0 0 1px 0;
+  font-family: inherit;
+  user-select: none;
+}
+.sec-arrow:hover {
+  background: var(--red);
+  border-color: var(--red);
+  transform: scale(1.1);
+}
+.sec-arrow:active { transform: scale(.96); }
+
+/* En móvil las flechas siempre visibles */
+@media (max-width: 768px) {
+  .sec-arrows { opacity: 1; }
+  .sec-arrow { width: 26px; height: 26px; font-size: 16px; }
 }
 
-/* ── Todo el contenido debajo del nav ───────────────────── */
-#hero     { margin-top:62px !important; position:relative; z-index:1; }
-#sections { position:relative; z-index:1; padding-top:6px; }
-
-/* ── nbtn uniforme con SVG ──────────────────────────────── */
-.nbtn {
-  display:flex !important;
-  align-items:center; justify-content:center;
-  background:none; border:none; color:#fff;
-  cursor:pointer; padding:7px 8px;
-  border-radius:5px; transition:background .2s;
-  position:relative; font-family:inherit;
+/* rowscroll: ocultar scrollbar pero mantener funcional */
+.rowscroll {
+  scroll-snap-type: x mandatory;
 }
-.nbtn:hover { background:rgba(255,255,255,.1); }
-.nbtn svg   { display:block; pointer-events:none; }
-
-/* ── Botón mod oculto hasta ser moderador ───────────────── */
-.mod-hidden { display:none !important; }
-
-/* ── Badge carrito ──────────────────────────────────────── */
-.cart-btn { position:relative; }
-#cart-count, #cart-count-mob {
-  position:absolute; top:1px; right:1px;
-  background:var(--red); color:#fff;
-  font-size:9px; font-weight:700;
-  min-width:15px; height:15px; border-radius:8px;
-  display:none; align-items:center; justify-content:center; padding:0 2px;
+.rowscroll .card {
+  scroll-snap-align: start;
 }
 
-/* ── Grupo lupa+campo desktop ───────────────────────────── */
-.nav-search-group {
-  align-items:center; gap:0;
-  background:rgba(0,0,0,.4);
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:6px; overflow:hidden;
-  transition:border-color .2s;
-}
-.nav-search-group:focus-within { border-color:rgba(255,255,255,.3); }
-.nav-search-group .search-icon-btn {
-  padding:6px 8px;
-  background:none; border:none;
-  color:var(--muted); cursor:pointer;
-  display:flex; align-items:center; justify-content:center;
-}
-.nav-search-group .search-icon-btn:hover { color:#fff; }
-.search-wrap {
-  max-width:0; overflow:hidden;
-  transition:max-width .3s,opacity .3s; opacity:0;
-  background:none; border:none;
-}
-.search-wrap.open { max-width:180px; opacity:1; }
-.search-wrap input {
-  background:none; border:none; color:#fff;
-  padding:6px 10px 6px 2px; font-size:13px;
-  outline:none; width:170px; font-family:inherit;
-}
-.search-wrap input::placeholder { color:#555; }
+/* ── CARRITO: peso y dirección ────────────────────────────── */
+.ci-bottom{display:flex;align-items:center;gap:8px;margin-top:3px}
+.ci-size{font-size:10px;color:#666;background:#1a1a1a;padding:1px 5px;border-radius:3px}
+.cart-weight-row{font-size:11px;color:#555;margin-bottom:6px;min-height:14px}
+.cart-addr-box{background:#0d1a0d;border:1px solid rgba(70,211,105,.2);border-radius:7px;padding:10px 12px;margin-bottom:10px}
+.cart-addr-lbl{font-size:10px;color:#46d369;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
+.cart-addr-val{font-size:13px;color:#ddd;font-weight:500}
+.cart-addr-tel{font-size:12px;color:#aaa;margin-top:3px}
+#code-result{display:none;text-align:center;margin-top:12px;border:1px dashed var(--red);border-radius:7px;padding:14px}
+.crlbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+#code-num{font-family:'Bebas Neue',sans-serif;font-size:50px;color:var(--red);letter-spacing:6px;line-height:1}
 
-/* ── Barra búsqueda móvil debajo del nav ────────────────── */
-#mob-search-bar {
-  position:fixed; top:62px; left:0; right:0;
-  background:#111; border-bottom:1px solid #222;
-  z-index:490; max-height:0; overflow:hidden;
-  transition:max-height .25s;
-}
-#mob-search-bar.open { max-height:56px; }
-.mob-search-inner {
-  display:flex; align-items:center; gap:8px;
-  padding:8px 14px;
-}
-.mob-search-inner svg { flex-shrink:0; }
-.mob-search-inner input {
-  flex:1; background:none; border:none; color:#fff;
-  font-size:14px; outline:none; font-family:inherit;
-}
-.mob-search-inner input::placeholder { color:#555; }
-.mob-search-inner button {
-  background:none; border:none; color:#666;
-  cursor:pointer; font-size:16px; padding:0 4px;
-}
-.mob-search-inner button:hover { color:#fff; }
+/* ── MOD: formulario negocio ──────────────────────────────── */
+.form-group-mod{margin-bottom:12px}
+.mod-input{width:100%;background:#1a1a1a;border:1px solid #2a2a2a;color:#fff;padding:10px 12px;border-radius:5px;font-family:inherit;font-size:13px;outline:none;transition:border .2s}
+.mod-input:focus{border-color:var(--red)}
+.mod-input::placeholder{color:#444}
 
-/* ── Campanita badge ────────────────────────────────────── */
+/* ── ETIQUETA EN EMISIÓN ─────────────────────────────────── */
+.on-air-tag {
+  position:absolute;top:6px;left:6px;
+  background:linear-gradient(135deg,#e50914,#ff4444);
+  color:#fff;font-size:9px;font-weight:700;
+  padding:3px 6px;border-radius:2px;letter-spacing:.4px;
+  animation:pulse-tag 2s ease-in-out infinite;
+  box-shadow:0 0 8px rgba(229,9,20,.6);
+}
+@keyframes pulse-tag {
+  0%,100%{ box-shadow:0 0 6px rgba(229,9,20,.5); }
+  50%     { box-shadow:0 0 14px rgba(229,9,20,.9); }
+}
+.on-air-badge   { background:rgba(229,9,20,.2)!important; border-color:rgba(229,9,20,.6)!important; animation:pulse-tag 2s ease-in-out infinite; }
+.on-air-badge-sm{ background:rgba(229,9,20,.18);border:1px solid rgba(229,9,20,.5);border-radius:3px;color:#ff6666;font-size:11px;padding:2px 8px;animation:pulse-tag 2s ease-in-out infinite; }
+
+/* ── CARRITO: código de pedido arriba ────────────────────── */
+#cart-code-top{
+  background:#0d0d0d;border:1px solid #2a2a2a;border-radius:8px;
+  padding:12px 14px;margin-bottom:12px;text-align:center;
+}
+.cart-code-lbl { font-size:9px;color:#555;text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px; }
+.cart-code-num {
+  font-family:'Bebas Neue',sans-serif;font-size:44px;
+  color:#333;letter-spacing:5px;line-height:1;transition:color .3s;
+}
+.cart-code-hint{ font-size:10px;color:#444;margin-top:4px; }
+
+/* ── MENÚ MÓVIL ──────────────────────────────────────────── */
+.mob-menu-btn { display:none; font-size:20px; }
+
+#mob-menu-overlay {
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);
+  z-index:600;
+}
+#mob-menu-overlay.open { display:block; }
+
+#mob-menu-panel {
+  position:fixed;top:0;left:-280px;width:260px;height:100%;
+  background:#111;z-index:700;transition:left .3s cubic-bezier(.4,0,.2,1);
+  display:flex;flex-direction:column;border-right:1px solid #1f1f1f;
+  overflow-y:auto;
+}
+#mob-menu-panel.open { left:0; }
+
+.mob-menu-hdr {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 16px;border-bottom:1px solid #1f1f1f;background:#0a0a0a;
+  flex-shrink:0;
+}
+.mob-menu-logo {
+  font-family:'Bebas Neue',sans-serif;font-size:26px;
+  color:var(--red);letter-spacing:2px;
+}
+.mob-menu-close {
+  background:rgba(255,255,255,.08);border:none;color:#fff;
+  width:28px;height:28px;border-radius:50%;cursor:pointer;
+  font-size:14px;display:flex;align-items:center;justify-content:center;
+}
+.mob-menu-close:hover { background:rgba(255,255,255,.16); }
+
+.mob-menu-cats { padding:10px 8px;flex:1; }
+
+.mob-cat {
+  display:flex;align-items:center;width:100%;
+  background:none;border:none;color:var(--muted);
+  font-size:14px;font-family:inherit;cursor:pointer;
+  padding:12px 14px;border-radius:8px;text-align:left;
+  transition:background .15s,color .15s;margin-bottom:2px;
+}
+.mob-cat:hover { background:rgba(255,255,255,.07);color:#fff; }
+.mob-cat.active {
+  background:rgba(229,9,20,.12);color:#fff;
+  border-left:3px solid var(--red);padding-left:11px;
+}
+
+/* ── RESPONSIVE: ocultar nav-cats en móvil ───────────────── */
+@media(max-width:768px){
+  .nav-cats        { display:none!important; }
+  .mob-menu-btn    { display:flex!important; }
+  .card            { min-width:116px;width:116px; }
+  .card-img,.card-ph { width:116px;height:174px; }
+  #cart-panel      { width:100%;right:-100%; }
+  .mbody-grid      { grid-template-columns:1fr; }
+  .mside           { display:none; }
+  .pgrid           { grid-template-columns:1fr; }
+  .mod-mbox        { max-width:100%; }
+}
+
+/* ── FIXES Z-INDEX: nav SIEMPRE encima del hero/cards ───── */
+nav { z-index:500!important; }
+#hero { z-index:1; }
+#sections { position:relative; z-index:2; }
+/* card hover no sobresalga del nav */
+.card:hover { z-index:10; }
+
+/* ── SEARCH: icono a la izquierda ────────────────────────── */
+.search-icon-btn { order:-1; }
+.search-wrap { order:0; }
+/* cuando está abierto el campo se expande hacia la derecha */
+@media(max-width:768px){
+  .search-wrap.open { max-width:150px; }
+}
+
+/* ── NAVBAR ICONS (SVG, sin emoji) ──────────────────────── */
+.nbtn svg { display:block; pointer-events:none; }
+
+/* ── CAMPANITA ───────────────────────────────────────────── */
 .news-btn { position:relative; }
-#news-bell-badge, #news-bell-badge-mob {
+#news-bell-badge {
   position:absolute; top:2px; right:2px;
   background:var(--red); color:#fff; font-size:9px; font-weight:700;
   min-width:15px; height:15px; border-radius:8px;
   display:none; align-items:center; justify-content:center; padding:0 2px;
 }
 
-/* ── Dropdown usuario ───────────────────────────────────── */
-.user-menu-wrap  { position:relative; }
-.user-avatar-btn {
-  width:32px; height:32px;
-  border-radius:50% !important;
-  background:rgba(255,255,255,.08) !important;
-  border:1px solid rgba(255,255,255,.15) !important;
+/* ── PANEL LATERAL GENÉRICO (noticias / precios) ─────────── */
+#news-panel, #price-list-panel {
+  position:fixed; right:-360px; top:0; width:340px; height:100%;
+  background:#111; z-index:900; transition:right .32s;
+  display:flex; flex-direction:column;
+  border-left:1px solid #222; overflow:hidden;
 }
-.user-avatar-btn:hover {
-  background:rgba(255,255,255,.16) !important;
+#news-panel.open, #price-list-panel.open { right:0; }
+#news-overlay, #price-list-overlay {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:899;
 }
-.user-dropdown {
-  position:absolute; top:calc(100% + 8px); right:0;
-  background:#1a1a1a; border:1px solid #2a2a2a;
-  border-radius:8px; min-width:170px;
-  box-shadow:0 8px 24px rgba(0,0,0,.6);
-  z-index:600; opacity:0; transform:translateY(-6px);
-  pointer-events:none; transition:opacity .18s,transform .18s;
-}
-.user-dropdown.open {
-  opacity:1; transform:translateY(0); pointer-events:auto;
-}
-.user-dropdown-mob {
-  right:0; left:auto;
-}
-.user-dropdown-name {
-  padding:10px 14px 6px; font-size:12px;
-  color:#777; border-bottom:1px solid #222; margin-bottom:4px;
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-}
-.user-dd-item {
-  display:flex; align-items:center; gap:8px;
-  width:100%; padding:9px 14px;
-  background:none; border:none; color:#ccc;
-  font-size:13px; cursor:pointer; font-family:inherit;
-  text-align:left; transition:background .15s;
-}
-.user-dd-item:hover { background:rgba(255,255,255,.07); color:#fff; }
-.user-dd-item svg  { flex-shrink:0; opacity:.7; }
+#news-overlay.open, #price-list-overlay.open { display:block; }
 
-/* ── Card: ocultar label cuando hay hover ───────────────── */
-.card-lbl { transition:opacity .18s; }
-.card:hover .card-lbl { opacity:0 !important; pointer-events:none; }
-
-/* ── Grid vertical (vista por categoría) ────────────────── */
-.cardgrid {
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(146px,1fr));
-  gap:10px;
-  padding-bottom:10px;
+.side-panel-hdr {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:18px 18px; border-bottom:1px solid #222;
+  font-family:'Bebas Neue',sans-serif; font-size:18px;
+  background:#0a0a0a; flex-shrink:0;
 }
-@media(max-width:768px){
-  .cardgrid { grid-template-columns:repeat(auto-fill,minmax(116px,1fr)); }
+.side-panel-close {
+  background:rgba(255,255,255,.08); border:none; color:#fff;
+  width:28px; height:28px; border-radius:50%; cursor:pointer;
+  font-size:14px; display:flex; align-items:center; justify-content:center;
+}
+.side-panel-close:hover { background:rgba(255,255,255,.16); }
+
+/* ── NOTICIAS ────────────────────────────────────────────── */
+.news-list { flex:1; overflow-y:auto; padding:10px 14px; }
+.news-item {
+  background:var(--bg2); border:1px solid #232323; border-radius:8px;
+  padding:12px 14px; margin-bottom:10px;
+}
+.news-date  { font-size:10px; color:#555; margin-bottom:4px; }
+.news-title { font-size:14px; font-weight:600; margin-bottom:5px; }
+.news-body  { font-size:13px; color:#bbb; line-height:1.55; }
+
+/* ── LISTADO DE PRECIOS PÚBLICO ──────────────────────────── */
+.price-list-body { flex:1; overflow-y:auto; padding:0 14px; }
+.pl-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:9px 0; border-bottom:1px solid #1f1f1f; font-size:13px;
+}
+.pl-label { color:#ccc; }
+.pl-price  { color:var(--green); font-weight:700; font-size:14px; }
+.price-list-note {
+  font-size:11px; color:#555; text-align:center;
+  padding:10px 14px 16px; flex-shrink:0; line-height:1.5;
 }
 
-/* ── Nota precio estimado ───────────────────────────────── */
+/* ── NOTA PRECIO ESTIMADO EN CARRITO ─────────────────────── */
 .cart-price-note {
-  font-size:11px; color:#666; line-height:1.55; margin-top:12px;
-  padding:8px 10px; background:#0d0d0d;
-  border-radius:5px; border-left:2px solid #2a2a2a;
+  font-size:11px; color:#555; line-height:1.55;
+  padding:10px 2px 4px; border-top:1px solid #1a1a1a; margin-top:8px;
 }
-.cart-price-note b { color:#888; }
+.cart-price-note b { color:#777; }
 
-/* ── Panel moderador — textarea ─────────────────────────── */
-.mod-textarea {
-  resize:vertical;
-  min-height:80px;
-  display:block !important;
-  width:100%;
-  background:#1a1a1a;
-  border:1px solid #2a2a2a;
-  color:#fff;
-  padding:10px 12px;
-  border-radius:5px;
-  font-family:inherit;
-  font-size:13px;
-  outline:none;
-  transition:border .2s;
-  box-sizing:border-box;
+/* ── PEDIDOS MOD: items en línea ─────────────────────────── */
+.orow-client { font-size:12px; color:#888; margin-bottom:5px; }
+.orow-items-list { display:flex; flex-direction:column; gap:3px; }
+.orow-item-line {
+  display:flex; gap:6px; align-items:baseline;
+  background:#161616; border-radius:4px; padding:4px 8px; font-size:12px;
 }
-.mod-textarea:focus { border-color:var(--red); }
-.mod-textarea::placeholder { color:#444; }
-.orders-hdr {
-  display:flex; align-items:center;
-  justify-content:space-between; margin-bottom:10px;
+.orow-item-title { color:#ddd; font-weight:500; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.orow-item-det   { color:#666; font-size:11px; flex-shrink:0; }
+.orow-item-price { color:var(--green); font-size:11px; font-weight:600; flex-shrink:0; margin-left:auto; }
+
+/* ── BOTÓN LIMPIAR BUZÓN ─────────────────────────────────── */
+.btn-clear-orders {
+  background:rgba(229,9,20,.12); border:1px solid rgba(229,9,20,.3);
+  color:var(--red); padding:5px 12px; border-radius:5px; font-size:12px;
+  cursor:pointer; font-family:inherit; transition:background .2s;
+}
+.btn-clear-orders:hover { background:rgba(229,9,20,.25); }
+
+/* ── CARD: quitar nombre duplicado al hacer hover ─────────── */
+.card:hover .card-lbl { opacity:0; }
+
+/* ── FIX: hero padding-top para que quede bajo el nav ──────── */
+#app > header#hero { margin-top:62px; }
+#sections { margin-top:0; }
+
+/* ══════════════════════════════════════════════════════════
+   VIDEOTECA v7 — estilos adicionales
+══════════════════════════════════════════════════════════ */
+
+/* ── NAV z-index y padding-top del contenido ─────────────── */
+/* El hero y las secciones quedan DEBAJO del navbar */
+#hero    { margin-top: 62px; }
+#sections{ padding-top: 8px; }
+
+/* Contenido general siempre debajo del nav */
+body > #app > header,
+body > #app > #sections { position: relative; z-index: 1; }
+nav { z-index: 500; }
+
+/* ── CARD: ocultar label cuando hay hover ────────────────── */
+.card-lbl { transition: opacity .18s; }
+.card:hover .card-lbl { opacity: 0; pointer-events: none; }
+/* El hover overlay ya tiene el nombre — no necesitamos el label */
+
+/* ── SEARCH: botón lupa a la izquierda del campo ─────────── */
+.nav-right {
+  /* invertir orden: lupa — campo — resto */
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+/* Campo se expande a la izquierda (hacia el logo) */
+.search-wrap.open {
+  max-width: 200px;
+  opacity: 1;
+  /* El campo aparece antes del ícono gracias al orden en HTML */
+}
+.search-icon-btn { order: -1; } /* lupa siempre la primera en nav-right */
+.search-wrap      { order: -1; } /* el campo al lado izquierdo de la lupa */
+
+/* ── NOTA PRECIO EN CARRITO ──────────────────────────────── */
+.cart-price-note {
+  font-size: 11px;
+  color: #666;
+  line-height: 1.5;
+  margin-top: 10px;
+  padding: 8px 10px;
+  background: #0d0d0d;
+  border-radius: 5px;
+  border-left: 2px solid #333;
+}
+.cart-price-note b { color: #888; }
+
+/* ── PANELS LATERALES (noticias y precios) ───────────────── */
+.side-panel-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 16px 12px; border-bottom: 1px solid #1f1f1f;
+  font-size: 14px; font-weight: 600; color: #ddd; flex-shrink: 0;
+}
+.side-panel-close {
+  background: rgba(255,255,255,.08); border: none; color: #aaa;
+  width: 26px; height: 26px; border-radius: 50%; cursor: pointer;
+  font-size: 13px; display: flex; align-items: center; justify-content: center;
+}
+.side-panel-close:hover { background: rgba(255,255,255,.16); color: #fff; }
+
+/* ── PANEL NOTICIAS ──────────────────────────────────────── */
+#news-panel {
+  position: fixed; top: 0; right: -320px; width: 300px; height: 100%;
+  background: #111; z-index: 600; transition: right .3s cubic-bezier(.4,0,.2,1);
+  display: flex; flex-direction: column; border-left: 1px solid #1f1f1f;
+}
+#news-panel.open { right: 0; }
+#news-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 590;
+}
+#news-overlay.open { display: block; }
+.news-list { flex: 1; overflow-y: auto; padding: 10px 14px; }
+.news-item {
+  background: #1a1a1a; border-radius: 8px; padding: 12px;
+  margin-bottom: 10px; border: 1px solid #242424;
+}
+.news-date  { font-size: 10px; color: #555; margin-bottom: 4px; }
+.news-title { font-size: 13px; font-weight: 600; color: #e0e0e0; margin-bottom: 5px; }
+.news-body  { font-size: 12px; color: #999; line-height: 1.55; }
+
+/* Badge campanita */
+#news-bell-badge {
+  position: absolute; top: 2px; right: 2px;
+  background: var(--red); color: #fff; font-size: 9px; font-weight: 700;
+  min-width: 15px; height: 15px; border-radius: 8px;
+  display: none; align-items: center; justify-content: center; padding: 0 2px;
 }
 
-/* ── Badge modo en listado de precios ───────────────────── */
+/* ── PANEL LISTADO PRECIOS ───────────────────────────────── */
+#price-list-panel {
+  position: fixed; top: 0; right: -320px; width: 300px; height: 100%;
+  background: #111; z-index: 600; transition: right .3s cubic-bezier(.4,0,.2,1);
+  display: flex; flex-direction: column; border-left: 1px solid #1f1f1f;
+}
+#price-list-panel.open { right: 0; }
+#price-list-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 590;
+}
+#price-list-overlay.open { display: block; }
+.price-list-body { flex: 1; overflow-y: auto; padding: 4px 14px 10px; }
+.pl-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 0; border-bottom: 1px solid #1a1a1a; font-size: 13px;
+}
+.pl-label { color: #ccc; }
+.pl-price { color: var(--green); font-weight: 700; }
+.price-list-note {
+  font-size: 10px; color: #555; padding: 10px 14px 14px;
+  border-top: 1px solid #1a1a1a; line-height: 1.5; flex-shrink: 0;
+}
+
+/* ── PEDIDOS MODERADOR: ítems en línea ───────────────────── */
+.orow {
+  background: #161616; border-radius: 7px; padding: 12px 14px;
+  margin-bottom: 10px; border: 1px solid #232323;
+}
+.orow-hdr {
+  display: flex; justify-content: space-between; margin-bottom: 4px;
+}
+.orow-code  { font-family:'Bebas Neue',sans-serif; font-size: 20px; color: var(--red); }
+.orow-total { color: var(--green); font-weight: 700; font-size: 14px; }
+.orow-client{ font-size: 12px; color: #777; margin-bottom: 8px; }
+.orow-items-list { border-top: 1px solid #222; padding-top: 6px; }
+.orow-item-line {
+  display: flex; align-items: baseline; gap: 8px;
+  padding: 4px 0; border-bottom: 1px solid #1a1a1a; font-size: 12px;
+}
+.orow-item-line:last-child { border-bottom: none; }
+.orow-item-title { font-weight: 600; color: #ddd; min-width: 0; flex: 1; }
+.orow-item-det   { color: #777; font-size: 11px; white-space: nowrap; }
+.orow-item-price { color: var(--green); font-weight: 700; white-space: nowrap; font-size: 11px; }
+
+/* ── BOTÓN LIMPIAR BUZÓN ─────────────────────────────────── */
+.btn-clear-orders {
+  background: #1a0a0a; border: 1px solid rgba(229,9,20,.3); color: #cc3333;
+  padding: 5px 12px; border-radius: 5px; font-size: 12px; cursor: pointer;
+  font-family: inherit; transition: background .2s;
+}
+.btn-clear-orders:hover { background: rgba(229,9,20,.15); }
+
+/* ── ICONOS SVG BOTONES NAV ──────────────────────────────── */
+.cart-btn  { position: relative; }
+.cart-btn #cart-count {
+  position: absolute; top: 1px; right: 1px;
+  background: var(--red); color: #fff; font-size: 9px; font-weight: 700;
+  min-width: 15px; height: 15px; border-radius: 8px;
+  display: none; align-items: center; justify-content: center; padding: 0 2px;
+}
+.news-btn { position: relative; }
+
+/* ── BOTÓN PLAY Y ADD BIG (texto + ícono) ────────────────── */
+.btn-play {
+  display: flex; align-items: center; gap: 7px;
+}
+.btn-add-big {
+  display: flex; align-items: center; gap: 7px;
+}
+
+/* ── BRAND NAME — aplica a logo auth y nav ───────────────── */
+.auth-logo.brand-name span { color: #fff; font-size: 26px; vertical-align: super; }
+
+/* ── MOBILE AJUSTES ──────────────────────────────────────── */
+@media(max-width:768px){
+  #hero { margin-top: 62px; }
+  #news-panel, #price-list-panel { width: 88%; }
+  .search-wrap.open { max-width: 160px; }
+}
+
+/* ══════════════════════════════════════════════════════════
+   CORRECCIONES DEFINITIVAS v7
+══════════════════════════════════════════════════════════ */
+
+/* ── NAV siempre encima de todo ─────────────────────────── */
+nav {
+  position: fixed !important;
+  top: 0; left: 0; right: 0;
+  height: 62px;
+  z-index: 500 !important;
+}
+
+/* ── Todo el contenido debajo del nav ───────────────────── */
+#hero {
+  margin-top: 62px !important;
+  position: relative;
+  z-index: 1;
+}
+#sections {
+  position: relative;
+  z-index: 1;
+  padding-top: 6px;
+}
+
+/* ── nbtn con SVG — definición única limpia ─────────────── */
+.nbtn {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.nbtn svg { display: block; pointer-events: none; }
+
+/* ── Botón moderador: cuando visible siempre display:flex ── */
+#mod-btn { display: none; }
+#mod-btn:not(.mod-hidden) { display: flex !important; }
+
+/* ── Badge carrito ──────────────────────────────────────── */
+#cart-count {
+  position: absolute; top: 1px; right: 1px;
+  background: var(--red); color: #fff;
+  font-size: 9px; font-weight: 700;
+  min-width: 15px; height: 15px; border-radius: 8px;
+  align-items: center; justify-content: center; padding: 0 2px;
+}
+
+/* ── Badge campanita novedades ──────────────────────────── */
+.news-btn { position: relative; }
+#news-bell-badge {
+  position: absolute; top: 2px; right: 2px;
+  background: var(--red); color: #fff; font-size: 9px; font-weight: 700;
+  min-width: 15px; height: 15px; border-radius: 8px;
+  display: none; align-items: center; justify-content: center; padding: 0 2px;
+}
+
+/* ── Lupa a la izquierda del campo de búsqueda ───────────── */
+.search-icon-btn { order: 0; }
+#search-wrap     { order: 1; }
+
+/* ── Card hover: ocultar label inferior ─────────────────── */
+.card-lbl { transition: opacity .18s ease; }
+.card:hover .card-lbl { opacity: 0 !important; pointer-events: none; }
+
+/* ── Nota de precio estimado en carrito ─────────────────── */
+.cart-price-note {
+  font-size: 11px; color: #666; line-height: 1.55; margin-top: 12px;
+  padding: 8px 10px; background: #0d0d0d;
+  border-radius: 5px; border-left: 2px solid #2a2a2a;
+}
+.cart-price-note b { color: #888; }
+
+/* ── Badge de modo en listado de precios ────────────────── */
 .pl-mode-badge {
-  font-size:10px; color:#555; text-transform:uppercase;
-  letter-spacing:.6px; padding:4px 0 10px;
-  border-bottom:1px solid #1a1a1a; margin-bottom:4px;
+  font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: .6px;
+  padding: 4px 0 10px; border-bottom: 1px solid #1a1a1a; margin-bottom: 4px;
 }
