@@ -506,7 +506,7 @@ function openSagaPicker(sagaItem) {
         <button class="saga-part-add">+</button>
       </div>`).join("") +
       `<div style="margin-top:14px">
-        <button class="btn-red" onclick="sagaAddAll(${JSON.stringify(parts.map(p=>p.id))})">
+        <button class="btn-red" onclick="sagaAddAllFromEncoded('${encodeURIComponent(JSON.stringify(parts.map(p=>p.id)))}')">
           ➕ Añadir toda la saga (${parts.length} películas)
         </button>
       </div>`;
@@ -530,6 +530,15 @@ window.sagaAddAll = (ids) => {
   document.getElementById("cart-panel").classList.add("open");
   toast(`✓ Saga añadida (${ids.length} películas)`);
   closeOv("ov-saga");
+};
+
+window.sagaAddAllFromEncoded = (encodedIds) => {
+  try {
+    const ids = JSON.parse(decodeURIComponent(encodedIds || ""));
+    if (Array.isArray(ids)) window.sagaAddAll(ids);
+  } catch (_) {
+    toast("No se pudieron añadir las partes de la saga");
+  }
 };
 
 /* ── SELECTOR DE EPISODIOS ────────────────────────────────── */
@@ -1138,6 +1147,11 @@ function renderNewsBell(items) {
   if (bell) {
     bell.textContent = _unreadNews;
     bell.style.display = _unreadNews > 0 ? "flex" : "none";
+  }
+  const bellMob = document.getElementById("news-bell-badge-mob");
+  if (bellMob) {
+    bellMob.textContent = _unreadNews;
+    bellMob.style.display = _unreadNews > 0 ? "flex" : "none";
   }
 }
 
