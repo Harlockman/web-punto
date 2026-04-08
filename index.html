@@ -1,32 +1,356 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>VideoTeca VIP</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="style.css"/>
-  <link rel="stylesheet" href="auth.css"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>VideoTeca VIP</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
-  <div id="auth-root"></div>
+<!-- ═══ AUTH ════════════════════════════════════════════ -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo brand-name">VIDEOTECA<span>VIP</span></div>
+    <p id="auth-msg">Ingresa tus datos para entrar</p>
+    <input type="text"     id="reg-name" placeholder="Nombre completo" style="display:none"/>
+    <div class="phone-group">
+      <span>+53</span>
+      <input type="number" id="phone" placeholder="Número móvil (8 dígitos)"/>
+    </div>
+    <input type="password" id="pass" placeholder="Contraseña"/>
+    <div id="auth-err" class="auth-err"></div>
+    <button id="btnAuth" class="btn-red">INICIAR SESIÓN</button>
+    <p id="toggleAuth">¿No tienes cuenta? <b>Regístrate aquí</b></p>
+  </div>
+</div>
 
-  <div id="app" style="display:none">
-    <nav>
-      <div class="nav-content" style="display:flex; justify-content:space-between; align-items:center; padding:0 4%;">
-        <div class="brand-name" style="font-family:'Bebas Neue'; font-size:32px; color:#e50914; cursor:pointer" onclick="location.reload()">VIDEOTECA<span>VIP</span></div>
-        <div class="nav-right" style="display:flex; gap:15px;">
-          <button class="nbtn" onclick="window.logout()">Cerrar Sesión 🚪</button>
+<!-- ═══ APP ══════════════════════════════════════════════ -->
+<div id="app" style="display:none">
+
+  <!-- NAV -->
+  <nav id="navbar">
+    <a class="logo brand-name" href="#" onclick="showAll();return false">VIDEOTECA</a>
+
+    <!-- Categorías — solo desktop -->
+    <div class="nav-cats" id="nav-cats">
+      <button class="ncat active" onclick="navFilter(this,'all')">Inicio</button>
+      <button class="ncat" onclick="navFilter(this,'Peliculas')">Películas</button>
+      <button class="ncat" onclick="navFilter(this,'Sagas')">Sagas</button>
+      <button class="ncat" onclick="navFilter(this,'Series')">Series</button>
+      <button class="ncat" onclick="navFilter(this,'Novelas')">Novelas</button>
+      <button class="ncat" onclick="navFilter(this,'Shows')">Shows</button>
+      <button class="ncat" onclick="navFilter(this,'PeliculasAnimadas')">P.Anim</button>
+      <button class="ncat" onclick="navFilter(this,'Animados')">Cartoon</button>
+      <button class="ncat" onclick="navFilter(this,'Anime')">Anime</button>
+      <button class="ncat" onclick="navFilter(this,'Donghua')">Donghua</button>
+    </div>
+
+    <!-- Derecha del nav -->
+    <div class="nav-right" id="nav-right">
+
+      <!-- DESKTOP: lupa + campo pegados, campanita, precios, usuario dropdown, carrito -->
+      <div class="nav-search-group desk-only">
+        <button class="nbtn search-icon-btn" onclick="toggleSearch()" title="Buscar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </button>
+        <div class="search-wrap" id="search-wrap">
+          <input id="search-input" placeholder="Buscar…" oninput="doSearch(this.value)"/>
         </div>
       </div>
-    </nav>
 
-    <div id="hero"></div>
-    <div id="sections">
+      <button class="nbtn desk-only news-btn" onclick="toggleNewsPanel()" title="Novedades">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span id="news-bell-badge">0</span>
+      </button>
+
+      <button class="nbtn desk-only" onclick="togglePriceList()" title="Ver precios">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/></svg>
+      </button>
+
+      <!-- Usuario dropdown (desktop) -->
+      <div class="user-menu-wrap desk-only" id="user-menu-wrap">
+        <button class="nbtn user-avatar-btn" onclick="toggleUserMenu()" title="Usuario">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </button>
+        <div class="user-dropdown" id="user-dropdown">
+          <div class="user-dropdown-name" id="user-dropdown-name">—</div>
+          <button id="dd-mod-btn" class="user-dd-item mod-hidden" onclick="closeUserMenu();openMod()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Opciones mod.
+          </button>
+          <button class="user-dd-item" onclick="closeUserMenu();doLogout()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Cerrar sesión
+          </button>
+        </div>
       </div>
+
+      <button class="nbtn desk-only cart-btn" onclick="toggleCart()" title="Carrito">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span id="cart-count">0</span>
+      </button>
+
+      <!-- MOBILE: lupa, campanita, precios, usuario, carrito -->
+      <button class="nbtn mob-only search-icon-btn-mob" onclick="toggleSearch()" title="Buscar">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+
+      <button class="nbtn mob-only news-btn" onclick="toggleNewsPanel()" title="Novedades">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span id="news-bell-badge-mob">0</span>
+      </button>
+
+      <button class="nbtn mob-only" onclick="togglePriceList()" title="Ver precios">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/></svg>
+      </button>
+
+      <!-- Usuario móvil: dropdown con salir y mod si aplica -->
+      <div class="user-menu-wrap mob-only" id="user-menu-wrap-mob">
+        <button class="nbtn user-avatar-btn" onclick="toggleUserMenuMob()" title="Usuario">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </button>
+        <div class="user-dropdown user-dropdown-mob" id="user-dropdown-mob">
+          <div class="user-dropdown-name" id="user-dropdown-name-mob">—</div>
+          <button id="dd-mod-btn-mob" class="user-dd-item mod-hidden" onclick="closeMobUserMenu();openMod()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/></svg>
+            Opciones moderador
+          </button>
+          <button class="user-dd-item" onclick="closeMobUserMenu();toggleMobMenu()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            Categorías
+          </button>
+          <button class="user-dd-item" onclick="closeMobUserMenu();doLogout()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Cerrar sesión
+          </button>
+        </div>
+      </div>
+
+      <button class="nbtn mob-only cart-btn" onclick="toggleCart()" title="Carrito">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span id="cart-count-mob">0</span>
+      </button>
+
+    </div>
+  </nav>
+
+  <!-- Campo de búsqueda móvil (debajo del nav, full width) -->
+  <div id="mob-search-bar">
+    <div class="mob-search-inner">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="search-input-mob" placeholder="Buscar…" oninput="doSearch(this.value)"/>
+      <button onclick="closeMobSearch()">✕</button>
+    </div>
   </div>
 
-  <script type="module" src="script.js"></script>
+  <!-- PANEL MENÚ MÓVIL (deslizable desde la izquierda) -->
+  <div id="mob-menu-overlay" onclick="closeMobMenu()"></div>
+  <div id="mob-menu-panel">
+    <div class="mob-menu-hdr">
+      <span class="mob-menu-logo brand-name">VIDEOTECA</span>
+      <button class="mob-menu-close" onclick="closeMobMenu()">✕</button>
+    </div>
+    <div class="mob-menu-cats">
+      <button class="mob-cat active" onclick="mobFilter(this,'all')">🏠 Inicio</button>
+      <button class="mob-cat" onclick="mobFilter(this,'Peliculas')">🎬 Películas</button>
+      <button class="mob-cat" onclick="mobFilter(this,'Sagas')">🎞 Sagas</button>
+      <button class="mob-cat" onclick="mobFilter(this,'Series')">📺 Series</button>
+      <button class="mob-cat" onclick="mobFilter(this,'Novelas')">💕 Novelas</button>
+      <button class="mob-cat" onclick="mobFilter(this,'Shows')">🎤 Shows</button>
+      <button class="mob-cat" onclick="mobFilter(this,'PeliculasAnimadas')">✨ Pelí. Animadas</button>
+      <button class="mob-cat" onclick="mobFilter(this,'Animados')">🎨 Cartoon</button>
+      <button class="mob-cat" onclick="mobFilter(this,'Anime')">⛩ Anime</button>
+      <button class="mob-cat" onclick="mobFilter(this,'Donghua')">🐉 Donghua</button>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <header id="hero"></header>
+
+  <!-- SECCIONES -->
+  <div id="sections"></div>
+
+  <!-- ═══ MODAL DETALLE ═══════════════════════════════ -->
+  <div class="overlay" id="ov-detail" onclick="ovClose(event,'ov-detail')">
+    <div class="mbox" id="mbox-detail">
+      <button class="mclose" onclick="closeDetail()">✕</button>
+      <div class="vbox" id="vbox"></div>
+      <div class="mbody">
+        <div class="mbody-grid">
+          <div class="mbody-left">
+            <h2 id="d-title"></h2>
+            <div class="d-meta" id="d-meta"></div>
+            <p id="d-plot"></p>
+            <div class="d-extra" id="d-extra"></div>
+            <div class="d-actions">
+              <button class="btn-play" id="btn-trailer">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                VER TRÁILER
+              </button>
+              <button class="btn-add-big" id="btn-add">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                AÑADIR AL PEDIDO
+              </button>
+            </div>
+          </div>
+          <div class="mbody-right" id="d-info"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL SELECTOR DE SAGA ══════════════════════════ -->
+  <div class="overlay" id="ov-saga" onclick="ovClose(event,'ov-saga')">
+    <div class="mbox small-mbox" style="max-width:520px">
+      <button class="mclose" onclick="closeOv('ov-saga')">✕</button>
+      <h3 id="saga-title" style="font-family:'Bebas Neue',sans-serif;font-size:24px;margin-bottom:4px"></h3>
+      <p class="ep-sub">Elige qué partes deseas pedir:</p>
+      <div id="saga-parts"></div>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL EPISODIOS ══════════════════════════════ -->
+  <div class="overlay" id="ov-ep" onclick="ovClose(event,'ov-ep')">
+    <div class="mbox small-mbox" style="max-width:520px">
+      <button class="mclose" onclick="closeEp()">✕</button>
+      <h3 id="ep-title"></h3>
+      <p class="ep-sub">Selecciona lo que deseas pedir:</p>
+      <label class="flabel">Temporada:</label>
+      <select id="ep-season"></select>
+      <label class="flabel">Capítulos disponibles:</label>
+      <div id="ep-list" class="ep-list"></div>
+      <label class="flabel" style="margin-top:10px">O elegir por tipo:</label>
+      <select id="ep-type" onchange="toggleCustom()">
+        <option value="completa">Temporada completa</option>
+        <option value="serie_completa">Toda la serie</option>
+        <option value="custom">Capítulos específicos…</option>
+      </select>
+      <textarea id="ep-custom" placeholder="Ej: caps 1, 2, 5 al 10…"></textarea>
+      <button class="btn-red" style="margin-top:10px" id="ep-confirm">CONFIRMAR</button>
+    </div>
+  </div>
+
+  <!-- ═══ PANEL CARRITO ═══════════════════════════════ -->
+  <div id="cart-panel">
+    <span class="cart-close" onclick="toggleCart()">✕</span>
+    <h2 class="cart-ttl">MI PEDIDO</h2>
+    <div id="cart-code-top">
+      <div class="cart-code-lbl">CÓDIGO DE PEDIDO</div>
+      <div class="cart-code-num" id="cart-code-display">—</div>
+      <div class="cart-code-hint">Muéstraselo al dueño del negocio</div>
+    </div>
+    <div id="cart-items"></div>
+    <div class="cart-foot">
+      <div id="cart-address"></div>
+      <div class="cart-weight-row"><span id="cart-weight"></span></div>
+      <div class="cart-total-row"><span>TOTAL:</span><span id="cart-total">0 CUP</span></div>
+      <div class="cart-price-note">
+        ⚠ El precio mostrado es un <b>estimado orientativo</b>. Los precios están sujetos a cambios y pueden existir variaciones según los capítulos disponibles de algunas series o novelas.
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PANEL MODERADOR ══════════════════════════════ -->
+  <div class="overlay" id="ov-mod" onclick="ovClose(event,'ov-mod')">
+    <div class="mbox mod-mbox">
+      <button class="mclose" onclick="closeMod()">✕</button>
+      <div class="mod-hdr"><span class="mod-badge">⚙ PANEL MODERADOR</span></div>
+      <div class="mod-tabs">
+        <button class="mtab active" onclick="modTab(this,'tp')">💰 Precios</button>
+        <button class="mtab" onclick="modTab(this,'tn')">🏪 Negocio</button>
+        <button class="mtab" onclick="modTab(this,'tnews')">📢 Noticias</button>
+        <button class="mtab" onclick="modTab(this,'to')">📦 Pedidos</button>
+      </div>
+
+      <!-- Precios -->
+      <div id="tp" class="mtab-body">
+        <div class="mode-row">
+          <span class="mode-lbl">Modo activo:</span>
+          <div class="mode-group">
+            <button id="mbtn-f" class="mbtn active" onclick="setPriceMode('ficheros')">Por ficheros</button>
+            <button id="mbtn-c" class="mbtn"        onclick="setPriceMode('capacidad')">Por capacidad</button>
+          </div>
+        </div>
+        <div id="panel-f">
+          <p class="phint">Precio por tipo de contenido (CUP por fichero)</p>
+          <div class="pgrid" id="pgrid-f"></div>
+        </div>
+        <div id="panel-c" style="display:none">
+          <p class="phint">Precio por tamaño de almacenamiento (CUP)</p>
+          <div class="pgrid" id="pgrid-c"></div>
+        </div>
+        <button class="btn-red" style="margin-top:16px" onclick="savePrices()">💾 GUARDAR PRECIOS</button>
+      </div>
+
+      <!-- Negocio -->
+      <div id="tn" class="mtab-body" style="display:none">
+        <p class="phint">Datos del negocio que verán los clientes en su carrito</p>
+        <div class="form-group-mod">
+          <label class="flabel">Nombre del negocio</label>
+          <input class="mod-input" id="neg-nombre" placeholder="Ej: VideoTeca VIP"/>
+        </div>
+        <div class="form-group-mod">
+          <label class="flabel">Dirección de recogida</label>
+          <input class="mod-input" id="neg-dir" placeholder="Calle, número, municipio…"/>
+        </div>
+        <div class="form-group-mod">
+          <label class="flabel">Teléfono de contacto</label>
+          <input class="mod-input" id="neg-tel" placeholder="+53 5XXXXXXX"/>
+        </div>
+        <button class="btn-red" style="margin-top:14px" onclick="saveNegocio()">💾 GUARDAR DATOS</button>
+      </div>
+
+      <!-- Noticias -->
+      <div id="tnews" class="mtab-body" style="display:none">
+        <p class="phint">Publica mensajes para que los clientes los vean en su campanita</p>
+        <div class="form-group-mod">
+          <label class="flabel">Título</label>
+          <input class="mod-input" id="news-titulo" placeholder="Ej: Nueva colección disponible"/>
+        </div>
+        <div class="form-group-mod">
+          <label class="flabel">Mensaje</label>
+          <textarea class="mod-input mod-textarea" id="news-cuerpo" placeholder="Escribe el mensaje para tus clientes…"></textarea>
+        </div>
+        <button class="btn-red" style="margin-top:10px" onclick="publishNews()">📢 PUBLICAR NOTICIA</button>
+      </div>
+
+      <!-- Pedidos -->
+      <div id="to" class="mtab-body" style="display:none">
+        <div class="orders-hdr">
+          <p class="phint" style="margin:0">Pedidos recibidos (más recientes primero)</p>
+          <button class="btn-clear-orders" onclick="clearAllOrders()">🗑 Limpiar buzón</button>
+        </div>
+        <div id="orders-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ PANEL NOTICIAS ═══════════════════════════════ -->
+  <div id="news-panel">
+    <div class="side-panel-hdr">
+      <span>📢 Novedades</span>
+      <button class="side-panel-close" onclick="closeNewsPanel()">✕</button>
+    </div>
+    <div id="news-list" class="news-list"></div>
+  </div>
+  <div id="news-overlay" onclick="closeNewsPanel()"></div>
+
+  <!-- ═══ PANEL PRECIOS VIGENTES ═══════════════════════ -->
+  <div id="price-list-panel">
+    <div class="side-panel-hdr">
+      <span>💰 Precios vigentes</span>
+      <button class="side-panel-close" onclick="closePriceList()">✕</button>
+    </div>
+    <div id="price-list-body" class="price-list-body"></div>
+    <p class="price-list-note">⚠ Los precios pueden variar. Consulta al dueño para precios exactos.</p>
+  </div>
+  <div id="price-list-overlay" onclick="closePriceList()"></div>
+
+</div><!-- #app -->
+
+<div class="toast" id="toast"></div>
+<script type="module" src="script.js"></script>
 </body>
 </html>
