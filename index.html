@@ -26,12 +26,14 @@
   </div>
 </div>
 
-<!-- ═══ APP (oculta hasta login) ═══════════════════════ -->
+<!-- ═══ APP ══════════════════════════════════════════════ -->
 <div id="app" style="display:none">
 
   <!-- NAV -->
   <nav id="navbar">
     <a class="logo brand-name" href="#" onclick="showAll();return false">VIDEOTECA</a>
+
+    <!-- Categorías — solo desktop -->
     <div class="nav-cats" id="nav-cats">
       <button class="ncat active" onclick="navFilter(this,'all')">Inicio</button>
       <button class="ncat" onclick="navFilter(this,'Peliculas')">Películas</button>
@@ -44,46 +46,110 @@
       <button class="ncat" onclick="navFilter(this,'Anime')">Anime</button>
       <button class="ncat" onclick="navFilter(this,'Donghua')">Donghua</button>
     </div>
-    <div class="nav-right">
-      <!-- Botón menú solo en móvil -->
-      <button class="nbtn mob-menu-btn" id="mob-menu-btn" onclick="toggleMobMenu()" title="Categorías">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </button>
-      <!-- Búsqueda: icono a la izquierda del campo -->
-      <button class="nbtn search-icon-btn" onclick="toggleSearch()" title="Buscar">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      </button>
-      <div class="search-wrap" id="search-wrap">
-        <input id="search-input" placeholder="Buscar…" oninput="doSearch(this.value)"/>
+
+    <!-- Derecha del nav -->
+    <div class="nav-right" id="nav-right">
+
+      <!-- DESKTOP: lupa + campo pegados, campanita, precios, usuario dropdown, carrito -->
+      <div class="nav-search-group desk-only">
+        <button class="nbtn search-icon-btn" onclick="toggleSearch()" title="Buscar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </button>
+        <div class="search-wrap" id="search-wrap">
+          <input id="search-input" placeholder="Buscar…" oninput="doSearch(this.value)"/>
+        </div>
       </div>
-      <span id="uname" class="uname"></span>
-      <!-- Campanita de noticias -->
-      <button class="nbtn news-btn" onclick="toggleNewsPanel()" title="Novedades">
+
+      <button class="nbtn desk-only news-btn" onclick="toggleNewsPanel()" title="Novedades">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
         <span id="news-bell-badge">0</span>
       </button>
-      <!-- Listado de precios -->
-      <button class="nbtn" onclick="togglePriceList()" title="Ver precios">
+
+      <button class="nbtn desk-only" onclick="togglePriceList()" title="Ver precios">
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/></svg>
       </button>
-      <button id="mod-btn" class="nbtn mod-hidden" onclick="openMod()" title="Moderador">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      </button>
-      <button class="nbtn" onclick="doLogout()" title="Salir">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-      </button>
-      <button class="nbtn cart-btn" onclick="toggleCart()" title="Carrito">
+
+      <!-- Usuario dropdown (desktop) -->
+      <div class="user-menu-wrap desk-only" id="user-menu-wrap">
+        <button class="nbtn user-avatar-btn" onclick="toggleUserMenu()" title="Usuario">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </button>
+        <div class="user-dropdown" id="user-dropdown">
+          <div class="user-dropdown-name" id="user-dropdown-name">—</div>
+          <button id="dd-mod-btn" class="user-dd-item mod-hidden" onclick="closeUserMenu();openMod()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Opciones mod.
+          </button>
+          <button class="user-dd-item" onclick="closeUserMenu();doLogout()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Cerrar sesión
+          </button>
+        </div>
+      </div>
+
+      <button class="nbtn desk-only cart-btn" onclick="toggleCart()" title="Carrito">
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
         <span id="cart-count">0</span>
       </button>
+
+      <!-- MOBILE: lupa, campanita, precios, usuario, carrito -->
+      <button class="nbtn mob-only search-icon-btn-mob" onclick="toggleSearch()" title="Buscar">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+
+      <button class="nbtn mob-only news-btn" onclick="toggleNewsPanel()" title="Novedades">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span id="news-bell-badge-mob">0</span>
+      </button>
+
+      <button class="nbtn mob-only" onclick="togglePriceList()" title="Ver precios">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 1 0 0 7h5a3.5 3.5 0 1 1 0 7H6"/></svg>
+      </button>
+
+      <!-- Usuario móvil: dropdown con salir y mod si aplica -->
+      <div class="user-menu-wrap mob-only" id="user-menu-wrap-mob">
+        <button class="nbtn user-avatar-btn" onclick="toggleUserMenuMob()" title="Usuario">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </button>
+        <div class="user-dropdown user-dropdown-mob" id="user-dropdown-mob">
+          <div class="user-dropdown-name" id="user-dropdown-name-mob">—</div>
+          <button id="dd-mod-btn-mob" class="user-dd-item mod-hidden" onclick="closeMobUserMenu();openMod()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/></svg>
+            Opciones moderador
+          </button>
+          <button class="user-dd-item" onclick="closeMobUserMenu();toggleMobMenu()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            Categorías
+          </button>
+          <button class="user-dd-item" onclick="closeMobUserMenu();doLogout()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Cerrar sesión
+          </button>
+        </div>
+      </div>
+
+      <button class="nbtn mob-only cart-btn" onclick="toggleCart()" title="Carrito">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        <span id="cart-count-mob">0</span>
+      </button>
+
     </div>
   </nav>
+
+  <!-- Campo de búsqueda móvil (debajo del nav, full width) -->
+  <div id="mob-search-bar">
+    <div class="mob-search-inner">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="search-input-mob" placeholder="Buscar…" oninput="doSearch(this.value)"/>
+      <button onclick="closeMobSearch()">✕</button>
+    </div>
+  </div>
 
   <!-- PANEL MENÚ MÓVIL (deslizable desde la izquierda) -->
   <div id="mob-menu-overlay" onclick="closeMobMenu()"></div>
   <div id="mob-menu-panel">
     <div class="mob-menu-hdr">
-      <span class="mob-menu-logo">VIDEOTECA</span>
+      <span class="mob-menu-logo brand-name">VIDEOTECA</span>
       <button class="mob-menu-close" onclick="closeMobMenu()">✕</button>
     </div>
     <div class="mob-menu-cats">
@@ -119,8 +185,14 @@
             <p id="d-plot"></p>
             <div class="d-extra" id="d-extra"></div>
             <div class="d-actions">
-              <button class="btn-play"    id="btn-trailer">▶ VER TRÁILER</button>
-              <button class="btn-add-big" id="btn-add">🛒 AÑADIR AL PEDIDO</button>
+              <button class="btn-play" id="btn-trailer">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                VER TRÁILER
+              </button>
+              <button class="btn-add-big" id="btn-add">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                AÑADIR AL PEDIDO
+              </button>
             </div>
           </div>
           <div class="mbody-right" id="d-info"></div>
@@ -164,7 +236,6 @@
   <div id="cart-panel">
     <span class="cart-close" onclick="toggleCart()">✕</span>
     <h2 class="cart-ttl">MI PEDIDO</h2>
-    <!-- Código siempre visible en la parte superior -->
     <div id="cart-code-top">
       <div class="cart-code-lbl">CÓDIGO DE PEDIDO</div>
       <div class="cart-code-num" id="cart-code-display">—</div>
@@ -174,7 +245,7 @@
     <div class="cart-foot">
       <div id="cart-address"></div>
       <div class="cart-weight-row"><span id="cart-weight"></span></div>
-      <div class="cart-total-row"><span>TOTAL:</span><span id="cart-total">CUP 0</span></div>
+      <div class="cart-total-row"><span>TOTAL:</span><span id="cart-total">0 CUP</span></div>
       <div class="cart-price-note">
         ⚠ El precio mostrado es un <b>estimado orientativo</b>. Los precios están sujetos a cambios y pueden existir variaciones según los capítulos disponibles de algunas series o novelas.
       </div>
@@ -193,7 +264,7 @@
         <button class="mtab" onclick="modTab(this,'to')">📦 Pedidos</button>
       </div>
 
-      <!-- Pestaña Precios -->
+      <!-- Precios -->
       <div id="tp" class="mtab-body">
         <div class="mode-row">
           <span class="mode-lbl">Modo activo:</span>
@@ -213,7 +284,7 @@
         <button class="btn-red" style="margin-top:16px" onclick="savePrices()">💾 GUARDAR PRECIOS</button>
       </div>
 
-      <!-- Pestaña Negocio -->
+      <!-- Negocio -->
       <div id="tn" class="mtab-body" style="display:none">
         <p class="phint">Datos del negocio que verán los clientes en su carrito</p>
         <div class="form-group-mod">
@@ -231,33 +302,32 @@
         <button class="btn-red" style="margin-top:14px" onclick="saveNegocio()">💾 GUARDAR DATOS</button>
       </div>
 
-      <!-- Pestaña Noticias/Novedades -->
+      <!-- Noticias -->
       <div id="tnews" class="mtab-body" style="display:none">
         <p class="phint">Publica mensajes para que los clientes los vean en su campanita</p>
         <div class="form-group-mod">
           <label class="flabel">Título</label>
-          <input class="mod-input" id="news-titulo" placeholder="Ej: Nueva colección de películas disponible"/>
+          <input class="mod-input" id="news-titulo" placeholder="Ej: Nueva colección disponible"/>
         </div>
         <div class="form-group-mod">
           <label class="flabel">Mensaje</label>
-          <textarea class="mod-input" id="news-cuerpo" rows="3" placeholder="Escribe el mensaje para tus clientes…" style="resize:vertical;min-height:72px"></textarea>
+          <textarea class="mod-input mod-textarea" id="news-cuerpo" placeholder="Escribe el mensaje para tus clientes…"></textarea>
         </div>
-        <button class="btn-red" style="margin-top:10px;width:auto;padding:10px 20px" onclick="publishNews()">📢 PUBLICAR NOTICIA</button>
+        <button class="btn-red" style="margin-top:10px" onclick="publishNews()">📢 PUBLICAR NOTICIA</button>
       </div>
 
-      <!-- Pestaña Pedidos -->
+      <!-- Pedidos -->
       <div id="to" class="mtab-body" style="display:none">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div class="orders-hdr">
           <p class="phint" style="margin:0">Pedidos recibidos (más recientes primero)</p>
           <button class="btn-clear-orders" onclick="clearAllOrders()">🗑 Limpiar buzón</button>
         </div>
-        <div id="orders-list" class="cat-list"></div>
+        <div id="orders-list"></div>
       </div>
     </div>
   </div>
 
-
-  <!-- ═══ PANEL NOTICIAS (campanita) ══════════════════════ -->
+  <!-- ═══ PANEL NOTICIAS ═══════════════════════════════ -->
   <div id="news-panel">
     <div class="side-panel-hdr">
       <span>📢 Novedades</span>
@@ -267,22 +337,20 @@
   </div>
   <div id="news-overlay" onclick="closeNewsPanel()"></div>
 
-  <!-- ═══ PANEL LISTADO DE PRECIOS ═════════════════════════ -->
+  <!-- ═══ PANEL PRECIOS VIGENTES ═══════════════════════ -->
   <div id="price-list-panel">
     <div class="side-panel-hdr">
       <span>💰 Precios vigentes</span>
       <button class="side-panel-close" onclick="closePriceList()">✕</button>
     </div>
-    <p class="phint" style="padding:0 16px 10px">Precios en CUP por fichero</p>
     <div id="price-list-body" class="price-list-body"></div>
-    <p class="price-list-note">⚠ Los precios pueden variar. Consulta al dueño del negocio para precios exactos.</p>
+    <p class="price-list-note">⚠ Los precios pueden variar. Consulta al dueño para precios exactos.</p>
   </div>
   <div id="price-list-overlay" onclick="closePriceList()"></div>
 
 </div><!-- #app -->
 
 <div class="toast" id="toast"></div>
-
 <script type="module" src="script.js"></script>
 </body>
 </html>

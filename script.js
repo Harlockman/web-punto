@@ -131,9 +131,20 @@ onAuthStateChanged(auth, async u => {
   if (u) {
     document.getElementById("auth-screen").style.display = "none";
     document.getElementById("app").style.display = "block";
-    document.getElementById("uname").textContent = u.displayName || "Usuario";
+    const displayName = u.displayName || "Usuario";
+    const unameEl = document.getElementById("uname");
+    if (unameEl) unameEl.textContent = displayName;
+    const ddName = document.getElementById("user-dropdown-name");
+    if (ddName) ddName.textContent = displayName;
+    const ddNameMob = document.getElementById("user-dropdown-name-mob");
+    if (ddNameMob) ddNameMob.textContent = displayName;
     isMod = (u.email === MOD_EMAIL);
-    if (isMod) document.getElementById("mod-btn").classList.remove("mod-hidden");
+    if (isMod) {
+      ["dd-mod-btn","dd-mod-btn-mob"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove("mod-hidden");
+      });
+    }
     await loadPrices();
     loadCatalog();
     startNewsListener();
@@ -241,51 +252,49 @@ function renderHero() {
 function renderSections(filter) {
   const wrap = document.getElementById("sections");
   wrap.innerHTML = "";
+  // Al filtrar una categoría específica → grid vertical; en "all" → scroll horizontal por fila
+  wrap.dataset.mode = filter === "all" ? "all" : "cat";
 
-  // Sección "Recientes" — NO incluir películas que pertenecen a una saga
-  // (aparecerán dentro de la saga cuando el usuario pinche)
   if (filter === "all") {
     const news = allItems.filter(i => i.nuevo && !(i.category === "Peliculas" && i.saga));
-    if (news.length) wrap.appendChild(buildSection("🔥 Recién llegados", news, "_nuevo"));
+    if (news.length) wrap.appendChild(buildSection("🔥 Recién llegados", news, "_nuevo", false));
   }
 
   const cats = filter === "all" ? CATS : CATS.filter(c => c.key === filter);
   cats.forEach(c => {
     let items;
-    if (c.key === "Peliculas") {
-      // Solo películas que NO pertenecen a ninguna saga
+    if (c.key === "Peliculas")
       items = allItems.filter(i => i.category === "Peliculas" && !i.saga);
-    } else if (c.key === "Sagas") {
-      // Solo los documentos de tipo Saga (la colección), no las películas individuales
+    else if (c.key === "Sagas")
       items = allItems.filter(i => i.category === "Sagas");
-    } else {
+    else
       items = allItems.filter(i => i.category === c.key);
-    }
     if (!items.length) return;
-    wrap.appendChild(buildSection(c.label, items, c.key));
+    // En vista categoría → grid vertical; en all → scroll horizontal
+    wrap.appendChild(buildSection(c.label, items, c.key, filter !== "all"));
   });
 
   if (!wrap.children.length)
     wrap.innerHTML = `<p style="color:#666;padding:40px 4%;text-align:center">Sin contenido en esta categoría.</p>`;
 }
 
-function buildSection(title, items, secId) {
+function buildSection(title, items, secId, gridMode) {
   const uid = "row-" + secId.replace(/[^a-z0-9]/gi,"_") + "_" + Date.now();
   const div = document.createElement("div");
   div.className = "secblock"; div.dataset.sec = secId;
 
-  // Cabecera con título y flechas
   div.innerHTML = `
     <div class="sec-header">
       <div class="sectitle">${title}</div>
-      <div class="sec-arrows">
+      ${!gridMode ? `<div class="sec-arrows">
         <button class="sec-arrow" onclick="scrollRow('${uid}',-1)" aria-label="Anterior">&#8249;</button>
         <button class="sec-arrow" onclick="scrollRow('${uid}', 1)" aria-label="Siguiente">&#8250;</button>
-      </div>
+      </div>` : ""}
     </div>`;
 
   const row = document.createElement("div");
-  row.className = "rowscroll"; row.id = uid;
+  row.className = gridMode ? "cardgrid" : "rowscroll";
+  row.id = uid;
   items.forEach(item => row.appendChild(makeCard(item)));
   div.appendChild(row);
   return div;
@@ -314,10 +323,10 @@ function makeCard(item) {
   div.innerHTML = `
     ${img}
     ${badge}
-    <button class="qadd" onclick="event.stopPropagation();quickAdd('${item.id}')" title="Añadir al carrito">+</button>
+    <button class="qadd" onclick="event.stopPropagation();startAdd('${item.id}')" title="Añadir al pedido">+</button>
     <div class="card-hov">
       <div class="card-hov-name">${esc(item.title||"")}</div>
-      <div class="card-hov-meta">★ ${item.rating||"N/A"}${price!=="—"?" · CUP "+price:""}</div>
+      <div class="card-hov-meta">★ ${item.rating||"N/A"}${price!=="—"?" · "+price+" CUP":""}</div>
     </div>
     <div class="card-lbl">${esc(item.title||"")}</div>`;
   div.onclick = () => openDetail(item.id);
@@ -380,7 +389,7 @@ window.openDetail = async (id) => {
     ${curItem.actors   ? `<div><b>Reparto:</b> ${esc(curItem.actors)}</div>` : ""}
     <div class="price-block">
       <div class="price-lbl">Precio</div>
-      <div class="price-val">${price !== "—" ? "CUP " + price : "Consultar"}</div>
+      <div class="price-val">${price !== "—" ? price + " CUP" : "Consultar"}</div>
     </div>`;
 
   document.getElementById("btn-trailer").onclick = loadTrailer;
@@ -493,7 +502,7 @@ function openSagaPicker(sagaItem) {
           <div class="saga-part-title">${esc(p.title)}</div>
           <div class="saga-part-meta">${p.year||""} ${p.rating?"· ★"+p.rating:""}</div>
         </div>
-        <div class="saga-part-price">${itemPrice(p)!=="—"?"CUP "+itemPrice(p):""}</div>
+        <div class="saga-part-price">${itemPrice(p)!=="—"?itemPrice(p)+" CUP":""}</div>
         <button class="saga-part-add">+</button>
       </div>`).join("") +
       `<div style="margin-top:14px">
@@ -691,7 +700,7 @@ function renderCart() {
 
   if (!cart.length) {
     items.innerHTML = `<div style="text-align:center;padding:30px 0;color:#555;font-size:13px">Tu pedido está vacío</div>`;
-    total.textContent = "CUP 0";
+    total.textContent = "0 CUP";
     const wEl = document.getElementById("cart-weight");
     if (wEl) wEl.textContent = "";
     return;
@@ -706,9 +715,9 @@ function renderCart() {
     const sizeStr = bytes ? fmtSize(bytes) : "";
     let priceDetail = "";
     if (item._price !== "—" && item._unitPrice && item._qty > 1) {
-      priceDetail = `<span class="ci-price">${item._qty} × CUP ${item._unitPrice} = <b>CUP ${item._price}</b></span>`;
+      priceDetail = `<span class="ci-price">${item._qty} × ${item._unitPrice} CUP = <b>${item._price} CUP</b></span>`;
     } else if (item._price !== "—" && item._price) {
-      priceDetail = `<span class="ci-price">CUP ${item._price}</span>`;
+      priceDetail = `<span class="ci-price">${item._price} CUP</span>`;
     }
     const div = document.createElement("div");
     div.className = "ci";
@@ -725,7 +734,7 @@ function renderCart() {
       <button class="ci-rm" onclick="removeFromCart(${i})">✕</button>`;
     items.appendChild(div);
   });
-  total.textContent = "CUP " + sum;
+  total.textContent = sum + " CUP";
   const wEl = document.getElementById("cart-weight");
   if (wEl) wEl.textContent = totalBytes ? "Peso total: " + fmtSize(totalBytes) : "";
 }
@@ -884,7 +893,7 @@ function buildCatalogList() {
       ${item.poster?`<img class="crow-img" src="${esc(item.poster)}" alt=""/>`:`<div class="crow-ph">🎬</div>`}
       <span class="crow-ttl">${esc(item.title||"")}</span>
       <span class="crow-cat">${esc(item.category||"")}</span>
-      <span class="crow-price">${itemPrice(item)!=="—"?"CUP "+itemPrice(item):""}</span>
+      <span class="crow-price">${itemPrice(item)!=="—"?itemPrice(item)+" CUP":""}</span>
     </div>`).join("");
 }
 
@@ -905,13 +914,13 @@ async function loadOrders() {
         <div class="orow-item-line">
           <span class="orow-item-title">${esc(i.titulo||"")}</span>
           <span class="orow-item-det">${esc(i.detalle||"")}</span>
-          ${i.precio?`<span class="orow-item-price">CUP ${i.precio}</span>`:""}
+          ${i.precio?`<span class="orow-item-price">${i.precio} CUP</span>`:""}
         </div>`).join("");
       const fecha = o.fecha?.toDate ? o.fecha.toDate().toLocaleString("es",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}) : "";
       return `<div class="orow">
         <div class="orow-hdr">
           <span class="orow-code">#${o.codigo}</span>
-          <span class="orow-total">CUP ${o.total||"—"}</span>
+          <span class="orow-total">${o.total||"—"} CUP</span>
         </div>
         <div class="orow-client">📞 ${esc(o.telefono||o.cliente||"")} ${fecha?"· "+fecha:""}</div>
         <div class="orow-items-list">${itemsHtml}</div>
@@ -994,22 +1003,90 @@ window.mobFilter = (btn, cat) => {
 };
 
 window.toggleSearch = () => {
+  // Desktop
   const w = document.getElementById("search-wrap");
-  w.classList.toggle("open");
-  if (w.classList.contains("open")) document.getElementById("search-input").focus();
+  if (w) {
+    w.classList.toggle("open");
+    if (w.classList.contains("open")) document.getElementById("search-input")?.focus();
+  }
 };
+// Botón lupa móvil — abre barra separada debajo del nav
+window.toggleSearch.mob = () => {};
+document.addEventListener("DOMContentLoaded", () => {
+  const mobBtn = document.querySelector(".search-icon-btn-mob");
+  if (mobBtn) mobBtn.onclick = () => {
+    const bar = document.getElementById("mob-search-bar");
+    if (!bar) return;
+    bar.classList.toggle("open");
+    if (bar.classList.contains("open")) document.getElementById("search-input-mob")?.focus();
+  };
+});
 
 window.doSearch = (q) => {
-  const lo = q.toLowerCase().trim();
-  if (!lo) { renderSections("all"); return; }
+  const lo = (q||"").toLowerCase().trim();
+  // Sincronizar los dos campos de búsqueda
+  const inp1 = document.getElementById("search-input");
+  const inp2 = document.getElementById("search-input-mob");
+  if (inp1 && inp1.value !== q) inp1.value = q;
+  if (inp2 && inp2.value !== q) inp2.value = q;
+  if (!lo) { renderSections("all"); document.getElementById("hero").style.display = ""; return; }
   const hits = allItems.filter(i=>(i.title||"").toLowerCase().includes(lo) || (i.genre||"").toLowerCase().includes(lo));
   const wrap = document.getElementById("sections");
   wrap.innerHTML = "";
   document.getElementById("hero").style.display = "none";
   if (!hits.length) { wrap.innerHTML=`<p style="color:#666;padding:40px 4%">Sin resultados para "${esc(q)}"</p>`; return; }
-  wrap.appendChild(buildSection(`Resultados: "${esc(q)}"`, hits, "_search"));
+  wrap.appendChild(buildSection(`Resultados: "${esc(q)}"`, hits, "_search", true));
 };
 
+
+/* ── MENÚ USUARIO DROPDOWN ────────────────────────────────── */
+window.toggleUserMenu = () => {
+  const dd = document.getElementById("user-dropdown");
+  if (!dd) return;
+  const isOpen = dd.classList.contains("open");
+  dd.classList.toggle("open", !isOpen);
+  if (!isOpen) {
+    const close = (e) => {
+      if (!document.getElementById("user-menu-wrap")?.contains(e.target)) {
+        dd.classList.remove("open");
+        document.removeEventListener("click", close);
+      }
+    };
+    setTimeout(() => document.addEventListener("click", close), 10);
+  }
+};
+
+window.closeUserMenu = () => {
+  document.getElementById("user-dropdown")?.classList.remove("open");
+};
+
+window.toggleUserMenuMob = () => {
+  const dd = document.getElementById("user-dropdown-mob");
+  if (!dd) return;
+  const isOpen = dd.classList.contains("open");
+  dd.classList.toggle("open", !isOpen);
+  if (!isOpen) {
+    const close = (e) => {
+      if (!document.getElementById("user-menu-wrap-mob")?.contains(e.target)) {
+        dd.classList.remove("open");
+        document.removeEventListener("click", close);
+      }
+    };
+    setTimeout(() => document.addEventListener("click", close), 10);
+  }
+};
+
+window.closeMobUserMenu = () => {
+  document.getElementById("user-dropdown-mob")?.classList.remove("open");
+};
+
+/* Búsqueda móvil */
+window.closeMobSearch = () => {
+  const bar = document.getElementById("mob-search-bar");
+  if (bar) bar.classList.remove("open");
+  const inp = document.getElementById("search-input-mob");
+  if (inp) { inp.value = ""; doSearch(""); }
+};
 /* ── OVERLAY HELPERS ─────────────────────────────────────── */
 function openOv(id)  { document.getElementById(id).classList.add("open"); document.body.style.overflow="hidden"; }
 function closeOv(id) { document.getElementById(id).classList.remove("open"); document.body.style.overflow=""; }
@@ -1155,7 +1232,7 @@ function renderPublicPriceList() {
       Object.entries(capPrices).map(([k,v])=>`
         <div class="pl-row">
           <span class="pl-label">${capLabels[k]||k}</span>
-          <span class="pl-price">CUP ${v}</span>
+          <span class="pl-price">${v} CUP</span>
         </div>`).join("");
   } else {
     // Mostrar precios por fichero (modo default)
@@ -1163,7 +1240,7 @@ function renderPublicPriceList() {
       Object.entries(filePrices).map(([k,v])=>`
         <div class="pl-row">
           <span class="pl-label">${fileLabels[k]||k}</span>
-          <span class="pl-price">CUP ${v}</span>
+          <span class="pl-price">${v} CUP</span>
         </div>`).join("");
   }
 }
