@@ -302,6 +302,9 @@ nav{
   z-index:1;
   padding:8px 0 26px;
 }
+#sections.sections-under-nav{
+  padding-top:72px;
+}
 
 /* hero */
 .hslide{
@@ -374,6 +377,9 @@ nav{
   overflow:auto;
   padding-bottom:8px;
   scrollbar-width:thin;
+}
+.rowscroll .card{
+  flex:0 0 150px;
 }
 .cardgrid{
   display:grid;
@@ -907,12 +913,15 @@ nav{
   .htitle{font-size:40px}
   .hdesc{font-size:13px}
   .mbody-grid{grid-template-columns:1fr}
+  .rowscroll .card{flex-basis:136px}
+  .mob-menu-btn{display:flex !important}
 }
 @media(max-width:768px){
   .secblock{padding:0 12px}
   .sectitle{font-size:17px}
   .cardgrid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:9px}
   .card,.card-img,.card-ph{min-height:182px;height:182px}
+  .rowscroll .card{flex-basis:128px}
   #cart-panel{width:100vw}
   #news-panel,#price-list-panel{width:100vw}
   .mode-row{flex-direction:column;align-items:flex-start}

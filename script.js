@@ -248,12 +248,20 @@ function renderHero() {
   }, 7000);
 }
 
+function setHeroVisible(visible) {
+  const hero = document.getElementById("hero");
+  const sections = document.getElementById("sections");
+  if (!hero || !sections) return;
+  hero.style.display = visible ? "" : "none";
+  sections.classList.toggle("sections-under-nav", !visible);
+}
+
 /* ── SECCIONES ───────────────────────────────────────────── */
 function renderSections(filter) {
   const wrap = document.getElementById("sections");
   wrap.innerHTML = "";
-  // Al filtrar una categoría específica → grid vertical; en "all" → scroll horizontal por fila
-  wrap.dataset.mode = filter === "all" ? "all" : "cat";
+  // Todas las vistas usan filas horizontales con scroll (sin apilar en grid).
+  wrap.dataset.mode = "scroll";
 
   if (filter === "all") {
     const news = allItems.filter(i => i.nuevo && !(i.category === "Peliculas" && i.saga));
@@ -270,8 +278,7 @@ function renderSections(filter) {
     else
       items = allItems.filter(i => i.category === c.key);
     if (!items.length) return;
-    // En vista categoría → grid vertical; en all → scroll horizontal
-    wrap.appendChild(buildSection(c.label, items, c.key, filter !== "all"));
+    wrap.appendChild(buildSection(c.label, items, c.key, false));
   });
 
   if (!wrap.children.length)
@@ -424,13 +431,14 @@ async function fetchTrailer(item) {
 function loadTrailer() {
   const vbox = document.getElementById("vbox");
   const origin = encodeURIComponent(window.location.origin);
+  const youtubeParams = "autoplay=1&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3&disablekb=1&fs=0";
   if (_trailerKey) {
-    vbox.innerHTML = `<iframe src="https://www.youtube.com/embed/${_trailerKey}?autoplay=1&rel=0&origin=${origin}" allow="autoplay;encrypted-media" allowfullscreen></iframe>`;
+    vbox.innerHTML = `<iframe src="https://www.youtube.com/embed/${_trailerKey}?${youtubeParams}&origin=${origin}" allow="autoplay;encrypted-media;picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
   } else {
     toast("Cargando tráiler…");
     setTimeout(() => {
       if (_trailerKey) {
-        vbox.innerHTML = `<iframe src="https://www.youtube.com/embed/${_trailerKey}?autoplay=1&rel=0&origin=${origin}" allow="autoplay;encrypted-media" allowfullscreen></iframe>`;
+        vbox.innerHTML = `<iframe src="https://www.youtube.com/embed/${_trailerKey}?${youtubeParams}&origin=${origin}" allow="autoplay;encrypted-media;picture-in-picture" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
       } else if (curItem) {
         window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(curItem.title+" trailer")}`, "_blank");
       }
@@ -972,13 +980,13 @@ window.modTab = (btn, id) => {
 window.navFilter = (btn, cat) => {
   document.querySelectorAll(".ncat").forEach(b=>b.classList.remove("active"));
   btn.classList.add("active");
-  document.getElementById("hero").style.display = cat==="all" ? "" : "none";
+  setHeroVisible(cat === "all");
   renderSections(cat);
 };
 
 window.showAll = () => {
   document.querySelectorAll(".ncat").forEach((b,i)=>b.classList.toggle("active",i===0));
-  document.getElementById("hero").style.display = "";
+  setHeroVisible(true);
   renderSections("all");
 };
 
@@ -1006,7 +1014,7 @@ window.mobFilter = (btn, cat) => {
   });
   document.querySelectorAll(".mob-cat").forEach(b=>b.classList.remove("active"));
   btn.classList.add("active");
-  document.getElementById("hero").style.display = cat==="all" ? "" : "none";
+  setHeroVisible(cat === "all");
   renderSections(cat);
   closeMobMenu();
 };
@@ -1038,13 +1046,13 @@ window.doSearch = (q) => {
   const inp2 = document.getElementById("search-input-mob");
   if (inp1 && inp1.value !== q) inp1.value = q;
   if (inp2 && inp2.value !== q) inp2.value = q;
-  if (!lo) { renderSections("all"); document.getElementById("hero").style.display = ""; return; }
+  if (!lo) { setHeroVisible(true); renderSections("all"); return; }
   const hits = allItems.filter(i=>(i.title||"").toLowerCase().includes(lo) || (i.genre||"").toLowerCase().includes(lo));
   const wrap = document.getElementById("sections");
   wrap.innerHTML = "";
-  document.getElementById("hero").style.display = "none";
+  setHeroVisible(false);
   if (!hits.length) { wrap.innerHTML=`<p style="color:#666;padding:40px 4%">Sin resultados para "${esc(q)}"</p>`; return; }
-  wrap.appendChild(buildSection(`Resultados: "${esc(q)}"`, hits, "_search", true));
+  wrap.appendChild(buildSection(`Resultados: "${esc(q)}"`, hits, "_search", false));
 };
 
 
@@ -1226,6 +1234,7 @@ window.closePriceList = () => {
 function renderPublicPriceList() {
   const el = document.getElementById("price-list-body");
   if (!el) return;
+  el.innerHTML = `<p style="color:#777;font-size:13px;padding:10px 0">Cargando precios vigentes…</p>`;
 
   const fileLabels = {
     pelicula:"Película", saga:"Saga (por película)",
@@ -1240,22 +1249,27 @@ function renderPublicPriceList() {
     "16gb":"16 GB","32gb":"32 GB","64gb":"64 GB","128gb":"128 GB",
   };
 
-  if (priceMode === "capacidad") {
-    // Mostrar precios por capacidad
-    el.innerHTML = `<div class="pl-mode-badge">Por capacidad de almacenamiento</div>` +
-      Object.entries(capPrices).map(([k,v])=>`
+  getDoc(doc(db,"config","precios")).then(snap => {
+    if (!snap.exists()) {
+      el.innerHTML = `<p style="color:#777;font-size:13px;padding:10px 0">No hay precios publicados todavía.</p>`;
+      return;
+    }
+    const d = snap.data() || {};
+    const activeMode = d.modo === "capacidad" ? "capacidad" : "ficheros";
+    const activePrices = activeMode === "capacidad" ? (d.capacidad || {}) : (d.ficheros || {});
+    const rows = Object.entries(activePrices).filter(([,v]) => Number(v) > 0);
+    if (!rows.length) {
+      el.innerHTML = `<p style="color:#777;font-size:13px;padding:10px 0">No hay precios activos en este modo.</p>`;
+      return;
+    }
+    el.innerHTML = `<div class="pl-mode-badge">${activeMode === "capacidad" ? "Por capacidad de almacenamiento" : "Por tipo de fichero"}</div>` +
+      rows.map(([k,v])=>`
         <div class="pl-row">
-          <span class="pl-label">${capLabels[k]||k}</span>
+          <span class="pl-label">${activeMode === "capacidad" ? (capLabels[k]||k) : (fileLabels[k]||k)}</span>
           <span class="pl-price">${v} CUP</span>
         </div>`).join("");
-  } else {
-    // Mostrar precios por fichero (modo default)
-    el.innerHTML = `<div class="pl-mode-badge">Por tipo de fichero</div>` +
-      Object.entries(filePrices).map(([k,v])=>`
-        <div class="pl-row">
-          <span class="pl-label">${fileLabels[k]||k}</span>
-          <span class="pl-price">${v} CUP</span>
-        </div>`).join("");
-  }
+  }).catch(() => {
+    el.innerHTML = `<p style="color:#f88;font-size:13px;padding:10px 0">No se pudo cargar la lista de precios.</p>`;
+  });
 }
 
