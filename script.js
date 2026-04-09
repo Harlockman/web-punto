@@ -260,12 +260,12 @@ function setHeroVisible(visible) {
 function renderSections(filter) {
   const wrap = document.getElementById("sections");
   wrap.innerHTML = "";
-  // Todas las vistas usan filas horizontales con scroll (sin apilar en grid).
-  wrap.dataset.mode = "scroll";
+  const isHomeScreen = filter === "all";
+  wrap.dataset.mode = isHomeScreen ? "scroll" : "grid";
 
   if (filter === "all") {
     const news = allItems.filter(i => i.nuevo && !(i.category === "Peliculas" && i.saga));
-    if (news.length) wrap.appendChild(buildSection("🔥 Recién llegados", news, "_nuevo", false));
+    if (news.length) wrap.appendChild(buildSection("🔥 Recién llegados", news, "_nuevo", isHomeScreen));
   }
 
   const cats = filter === "all" ? CATS : CATS.filter(c => c.key === filter);
@@ -278,14 +278,14 @@ function renderSections(filter) {
     else
       items = allItems.filter(i => i.category === c.key);
     if (!items.length) return;
-    wrap.appendChild(buildSection(c.label, items, c.key, true));
+    wrap.appendChild(buildSection(c.label, items, c.key, isHomeScreen));
   });
 
   if (!wrap.children.length)
     wrap.innerHTML = `<p style="color:#666;padding:40px 4%;text-align:center">Sin contenido en esta categoría.</p>`;
 }
 
-function buildSection(title, items, secId, gridMode) {
+function buildSection(title, items, secId, isHomeScreen) {
   const uid = "row-" + secId.replace(/[^a-z0-9]/gi,"_") + "_" + Date.now();
   const div = document.createElement("div");
   div.className = "secblock"; div.dataset.sec = secId;
@@ -293,14 +293,14 @@ function buildSection(title, items, secId, gridMode) {
   div.innerHTML = `
     <div class="sec-header">
       <div class="sectitle">${title}</div>
-      ${!gridMode ? `<div class="sec-arrows">
+      ${isHomeScreen ? `<div class="sec-arrows">
         <button class="sec-arrow" onclick="scrollRow('${uid}',-1)" aria-label="Anterior">&#8249;</button>
         <button class="sec-arrow" onclick="scrollRow('${uid}', 1)" aria-label="Siguiente">&#8250;</button>
       </div>` : ""}
     </div>`;
 
   const row = document.createElement("div");
-  row.className = "cardgrid";
+  row.className = isHomeScreen ? "rowscroll" : "cardgrid";
   row.id = uid;
   items.forEach(item => row.appendChild(makeCard(item)));
   div.appendChild(row);
