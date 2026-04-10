@@ -20,7 +20,7 @@ const FB = {
 };
 
 /* Email que tiene rol de moderador en Firebase Auth */
-const MOD_EMAIL = "user55944214@videotecavip.com";
+const MOD_EMAIL = "54812901@altairpc.com";
 
 /* ── CATEGORÍAS ──────────────────────────────────────────── */
 const CATS = [
@@ -97,7 +97,7 @@ document.getElementById("btnAuth").onclick = async () => {
   const err = document.getElementById("auth-err");
   err.textContent = "";
   if (ph.length < 7) { err.textContent = "Número inválido (mínimo 7 dígitos)"; return; }
-  const mail = `user${ph}@videotecavip.com`;
+  const mail = `${ph}@altairpc.com`;
   try {
     if (isLoginMode) {
       await signInWithEmailAndPassword(auth, mail, ps);
